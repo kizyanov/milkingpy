@@ -3,6 +3,7 @@ from db import count_records, sum_records, insert_value_in_db
 from loguru import logger
 from decouple import config
 import time
+from telegram import send_message
 
 TARGET = config("TARGET", cast=int)
 BASE_TAKE = config("BASE_TAKE", cast=int)
@@ -19,9 +20,11 @@ def main():
         if disition > 0:
             # Buy
             logger.debug(f"Buy on  \t${disition:.2f} \tby ${assert_data[i]:.3f}")
+            send_message()
         else:
             # Sell
             logger.debug(f"Sell on \t${disition:.2f} \tby ${assert_data[i]:.3f}")
+            send_message()
 
         insert_value_in_db(disition / assert_data[i])
 
@@ -30,7 +33,5 @@ def main():
     logger.debug(f"Total amount {sum_records()} coins")
     
     time.sleep(1000)
-    
-
 
 main()
