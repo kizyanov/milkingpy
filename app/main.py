@@ -2,6 +2,8 @@ from test import assert_data
 from db import count_records, sum_records, insert_value_in_db
 from loguru import logger
 
+import time
+
 target = 100_000  # In USD
 base_take = 1000
 
@@ -27,6 +29,9 @@ def main():
         logger.debug("================================================================")
 
     logger.debug(f"Total amount {sum_records()} coins")
+    
+    time.sleep(1000)
+    
 
 
 main()
