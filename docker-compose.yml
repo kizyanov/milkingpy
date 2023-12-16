@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  milk:
+    build:
+      context: .
+    image: kizyanov/milk:latest
+    env_file:
+      - .env

@@ -13,8 +13,7 @@ def connect(db_name: str):
         """
     CREATE TABLE IF NOT EXISTS Records (
         id INTEGER PRIMARY KEY,
-        amount REAL NOT NULL,
-        date TIMESTAMP NOT NULL
+        amount REAL NOT NULL
     )
     """
     )
@@ -25,18 +24,27 @@ def insert_value_in_db(value) -> bool:
     conn = connect("milk.db")
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO Records (amount, date) VALUES (?, ?)",
-        (value, datetime.now().strftime("%B %d, %Y %I:%M%p")),
+        "INSERT INTO Records (amount) VALUES (?)",
+        (value,),
     )
     conn.commit()
     conn.close()
     return True
 
 
-def select_all_records() -> list:
+def count_records() -> int:
     conn = connect("milk.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT amount, date FROM Records")
-    result = list(cursor.fetchall())
+    cursor.execute("SELECT COUNT(*) FROM Records")
+    result = cursor.fetchone()[0]
+    conn.close()
+    return result
+
+
+def sum_records() -> int:
+    conn = connect("milk.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT COALESCE(SUM(amount), 0) FROM Records")
+    result = cursor.fetchone()[0]
     conn.close()
     return result
