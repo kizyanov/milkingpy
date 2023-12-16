@@ -8,6 +8,7 @@ from telegram import send_message
 TARGET = config("TARGET", cast=int)
 BASE_TAKE = config("BASE_TAKE", cast=int)
 
+
 def main():
     for i in range(TARGET // BASE_TAKE):
         current_step = (count_records() + 1) * BASE_TAKE
@@ -31,7 +32,8 @@ def main():
         logger.debug("================================================================")
 
     logger.debug(f"Total amount {sum_records()} coins")
-    
+
     time.sleep(1000)
+
 
 main()
