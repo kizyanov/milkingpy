@@ -2,7 +2,7 @@ from decouple import config
 import requests
 
 
-def send_message(msg: str):
+def send_message():
     msg = (
         "<b>{datetime.datetime.today().strftime('%a, %d %b %Y %H:%M:%S')}</b>\n"
         "<b>{state}</b> по {price}\n"
