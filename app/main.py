@@ -5,22 +5,11 @@ from kucoin.client import WsToken
 from decouple import config
 import aiohttp
 from aiotinydb import AIOTinyDB
+from interesticker import INTEREST_TICKET
 
 symbol_status = {}
 
 TIME_SCALP = "_1day"
-
-INTEREST_TICKET = [
-    "IMX-USDT",
-    "WLD-USDT",
-    "TON-USDT",
-    "SEI-USDT",
-    "SUI-USDT",
-    "OP-USDT",
-    "ARB-USDT",
-    "ICP-USDT",
-    "APT-USDT",
-]
 
 
 async def send_telegram_msg(msg: str):
