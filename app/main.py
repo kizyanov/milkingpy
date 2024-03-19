@@ -5,7 +5,7 @@ from kucoin.client import WsToken
 
 symbol_status = {}
 
-TIME_SCALP = "15min"
+TIME_SCALP = "_1min"
 
 INTEREST_TICKET = [
     "IMX-USDT",
@@ -31,7 +31,7 @@ async def main():
                 logger.debug(msg)
                 logger.debug(candle)
 
-    symbols = "".join([ticket + TIME_SCALP for ticket in INTEREST_TICKET])
+    symbols = ",".join([ticket + TIME_SCALP for ticket in INTEREST_TICKET])
 
     ws_client = await KucoinWsClient.create(None, WsToken(), deal_msg, private=False)
 
