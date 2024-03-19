@@ -1,15 +1,44 @@
-from test import assert_data
-from db import count_records, sum_records, insert_value_in_db
+import asyncio
 from loguru import logger
-from decouple import config
-import time
-from telegram import send_message
+from kucoin.ws_client import KucoinWsClient
+from kucoin.client import WsToken
+
+symbol_status = {}
+
+TIME_SCALP = "15min"
+
+INTEREST_TICKET = [
+    "IMX-USDT",
+    "WLD-USDT",
+    "TON-USDT",
+    "SEI-USDT",
+    "SUI-USDT",
+    "OP-USDT",
+    "ARB-USDT",
+    "ICP-USDT",
+    "APT-USDT",
+]
 
 
-def main():
-   
-    logger.debug(f"Total amount {sum_records()} coins")
+async def main():
+    async def deal_msg(msg):
+        match msg:
+            case {
+                "data": dict() as candle,
+                "type": "message",
+                "subject": "trade.candles.update",
+            }:
+                logger.debug(msg)
+                logger.debug(candle)
 
-    time.sleep(1000)
+    symbols = "".join([ticket + TIME_SCALP for ticket in INTEREST_TICKET])
 
-main()
+    ws_client = await KucoinWsClient.create(None, WsToken(), deal_msg, private=False)
+
+    await ws_client.subscribe(f"/market/candles:{symbols}")
+
+    while True:
+        await asyncio.sleep(0)
+
+
+asyncio.run(main())
