@@ -6,11 +6,10 @@ authors = ["Кизянов Антон Олегович <kizianov.ao@svrauto.ru>"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-loguru = "^0.7.2"
-python-decouple = "^3.8"
-requests = "^2.31.0"
-kucoin-python = "^1.0.14"
+python = "3.12.2"
+loguru = "0.7.2"
+python-decouple = "3.8"
+kucoin-python = "1.0.17"
 
 
 [build-system]
