@@ -4,7 +4,7 @@ from kucoin.ws_client import KucoinWsClient
 from kucoin.client import WsToken
 from decouple import config
 import aiohttp
-from aiotinydb import TinyDB, Query
+from aiotinydb import AIOTinyDB
 
 symbol_status = {}
 
