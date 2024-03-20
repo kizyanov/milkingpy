@@ -14,18 +14,18 @@ TIME_SCALP = "_1day"
 
 Tickert = Query()
 
+storage = {}
 
-async def db(command: str, ticket: str, funds: float | None = None):
-    async with AIOTinyDB("tinydb.json") as tinydb:
-        match command:
-            case "remove":
-                result = tinydb.remove(Tickert.ticket == ticket)
-            case "lock":
-                result = tinydb.insert({"ticket": ticket, "lock": True})
-            case "update":
-                result = tinydb.update({"funds": funds}, Tickert.ticket == ticket)
-            case "count":
-                result = tinydb.count(Tickert.ticket == ticket)
+
+def db(command: str, ticket: str, funds: float | None = None):
+    result = 0
+    match command:
+        case "remove":
+            storage.pop(ticket)
+        case "update":
+            storage[ticket] = funds
+        case "count":
+            result = int(ticket in storage)
     return result
 
 
@@ -58,18 +58,17 @@ async def main():
                 close_price = float(candle.get("candles")[2])
 
                 if open_price > close_price:  # open price > close price
-                    count = await db("count", candle.get("symbol"))
-                    if count == 1:
-                        await db("remove", candle.get("symbol"))
-                        msg = f'Sell {candle.get("symbol")} {open_price=} {close_price=}'
+                    if db("count", candle.get("symbol")) == 1:
+                        db("remove", candle.get("symbol"))
+                        msg = (
+                            f'Sell {candle.get("symbol")} {open_price=} {close_price=}'
+                        )
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
                 elif open_price < close_price:
-                    count = await db("count", candle.get("symbol"))
-                    if count == 0:
-                        await db("lock", candle.get("symbol"))
-                        await db("update", candle.get("symbol"), funds=199.22)
+                    if db("count", candle.get("symbol")) == 0:
+                        db("update", candle.get("symbol"), funds=199.22)
                         msg = f'Buy {candle.get("symbol")} {open_price=} {close_price=}'
                         logger.debug(msg)
                         await send_telegram_msg(msg)
