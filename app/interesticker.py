@@ -99,6 +99,8 @@ INTEREST_TICKET = [
     "CTI-USDT",
     "PLU-USDT",
     "GRT-USDT",
+]
+t = [
     "CAS-USDT",
     "REVV-USDT",
     "1INCH-USDT",
