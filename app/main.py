@@ -80,7 +80,7 @@ async def main():
     await ws_client.subscribe(f"/market/candles:{symbols}")
 
     while True:
-        await asyncio.sleep(0)
+        await asyncio.sleep(60)
 
 
 asyncio.run(main())
