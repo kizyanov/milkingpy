@@ -58,18 +58,18 @@ async def main():
                 close_price = float(candle.get("candles")[2])
 
                 if open_price > close_price:  # open price > close price
-                    count = await db("count", ticket)
+                    count = await db("count", candle.get("symbol"))
                     if count == 1:
-                        await db("remove", ticket)
+                        await db("remove", candle.get("symbol"))
                         msg = f'Sell {candle.get("symbol")} {open_price=} {close_price=}'
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
                 elif open_price < close_price:
-                    count = await db("count", ticket)
+                    count = await db("count", candle.get("symbol"))
                     if count == 0:
-                        await db("lock", ticket)
-                        await db("update", ticket, funds=199.22)
+                        await db("lock", candle.get("symbol"))
+                        await db("update", candle.get("symbol"), funds=199.22)
                         msg = f'Buy {candle.get("symbol")} {open_price=} {close_price=}'
                         logger.debug(msg)
                         await send_telegram_msg(msg)
