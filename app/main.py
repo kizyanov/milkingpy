@@ -55,7 +55,7 @@ async def send_telegram_msg(msg: str):
             pass
 
 
-async def main(tickets: list):
+async def main():
 
     async def deal_msg(msg):
         match msg:
@@ -81,7 +81,12 @@ async def main(tickets: list):
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
-    symbols = ",".join([ticket + TIME_SCALP for ticket in tickets])
+    symbols = ",".join(
+        [
+            ticket + TIME_SCALP
+            for ticket in ["JTO-USDT", "UTK-USDT", "SNS-USDT", "DOVI-USDT", "SEAM-USDT"]
+        ]
+    )
 
     ws_client = await KucoinWsClient.create(None, WsToken(), deal_msg, private=False)
 
@@ -91,12 +96,4 @@ async def main(tickets: list):
         await asyncio.sleep(60)
 
 
-Tickets = [    INTEREST_TICKET80]
-
-
-async def run():
-    logger.debug("Welcome to Milking Bot")
-    await asyncio.gather(*[main(i) for i in Tickets])
-
-
-asyncio.run(run())
+asyncio.run(main())
