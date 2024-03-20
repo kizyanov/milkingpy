@@ -100,6 +100,8 @@ INTEREST_TICKET = [
     "PLU-USDT",
     "GRT-USDT",
     "CAS-USDT",
+]
+d = [
     "REVV-USDT",
     "1INCH-USDT",
     "API3-USDT",
