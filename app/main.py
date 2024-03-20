@@ -6,10 +6,27 @@ from decouple import config
 import aiohttp
 from aiotinydb import AIOTinyDB
 from interesticker import INTEREST_TICKET
+from tinydb import Query
 
 symbol_status = {}
 
 TIME_SCALP = "_1day"
+
+Tickert = Query()
+
+
+async def db(command: str, ticket: str, funds: float | None = None):
+    async with AIOTinyDB("tinydb.json") as tinydb:
+        match command:
+            case "remove":
+                result = tinydb.remove(Tickert.ticket == ticket)
+            case "lock":
+                result = tinydb.insert({"ticket": ticket, "lock": True})
+            case "update":
+                result = tinydb.update({"funds": funds}, Tickert.ticket == ticket)
+            case "count":
+                result = tinydb.count(Tickert.ticket == ticket)
+    return result
 
 
 async def send_telegram_msg(msg: str):
@@ -41,14 +58,21 @@ async def main():
                 close_price = float(candle.get("candles")[2])
 
                 if open_price > close_price:  # open price > close price
-                    msg = f'Sell {candle.get("symbol")} {open_price=} {close_price=}'
-                    logger.debug(msg)
-                    await send_telegram_msg(msg)
+                    count = await db("count", ticket)
+                    if count == 1:
+                        await db("remove", ticket)
+                        msg = f'Sell {candle.get("symbol")} {open_price=} {close_price=}'
+                        logger.debug(msg)
+                        await send_telegram_msg(msg)
 
                 elif open_price < close_price:
-                    msg = f'Buy {candle.get("symbol")} {open_price=} {close_price=}'
-                    logger.debug(msg)
-                    await send_telegram_msg(msg)
+                    count = await db("count", ticket)
+                    if count == 0:
+                        await db("lock", ticket)
+                        await db("update", ticket, funds=199.22)
+                        msg = f'Buy {candle.get("symbol")} {open_price=} {close_price=}'
+                        logger.debug(msg)
+                        await send_telegram_msg(msg)
 
     symbols = ",".join([ticket + TIME_SCALP for ticket in INTEREST_TICKET])
 
