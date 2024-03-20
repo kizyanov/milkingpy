@@ -5,7 +5,18 @@ from kucoin.client import WsToken
 from decouple import config
 import aiohttp
 from aiotinydb import AIOTinyDB
-from interesticker import INTEREST_TICKET
+from interesticker import (
+    INTEREST_TICKET80,
+    INTEREST_TICKET160,
+    INTEREST_TICKET240,
+    INTEREST_TICKET320,
+    INTEREST_TICKET400,
+    INTEREST_TICKET480,
+    INTEREST_TICKET720,
+    INTEREST_TICKET560,
+    INTEREST_TICKET640,
+    INTEREST_TICKET800,
+)
 from tinydb import Query
 
 symbol_status = {}
@@ -44,8 +55,7 @@ async def send_telegram_msg(msg: str):
             pass
 
 
-async def main():
-    logger.debug("Welcome to Milking Bot")
+async def main(tickets: list):
 
     async def deal_msg(msg):
         match msg:
@@ -60,20 +70,18 @@ async def main():
                 if open_price > close_price:  # open price > close price
                     if db("count", candle.get("symbol")) == 1:
                         db("remove", candle.get("symbol"))
-                        msg = (
-                            f'Sell {candle.get("symbol")} {open_price=} {close_price=}'
-                        )
+                        msg = f'Sell \t\t{candle.get("symbol")} \t{open_price=} \t{close_price=}'
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
                 elif open_price < close_price:
                     if db("count", candle.get("symbol")) == 0:
                         db("update", candle.get("symbol"), funds=199.22)
-                        msg = f'Buy {candle.get("symbol")} {open_price=} {close_price=}'
+                        msg = f'Buy \t\t{candle.get("symbol")} \t{open_price=} \t{close_price=}'
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
-    symbols = ",".join([ticket + TIME_SCALP for ticket in INTEREST_TICKET])
+    symbols = ",".join([ticket + TIME_SCALP for ticket in tickets])
 
     ws_client = await KucoinWsClient.create(None, WsToken(), deal_msg, private=False)
 
@@ -83,4 +91,23 @@ async def main():
         await asyncio.sleep(60)
 
 
-asyncio.run(main())
+Tickets = [
+    INTEREST_TICKET80,
+    INTEREST_TICKET160,
+    INTEREST_TICKET240,
+    INTEREST_TICKET320,
+    INTEREST_TICKET400,
+    INTEREST_TICKET480,
+    INTEREST_TICKET720,
+    INTEREST_TICKET560,
+    INTEREST_TICKET640,
+    INTEREST_TICKET800,
+]
+
+
+async def run():
+    logger.debug("Welcome to Milking Bot")
+    await asyncio.gather(*[main(i) for i in Tickets])
+
+
+asyncio.run(run())
