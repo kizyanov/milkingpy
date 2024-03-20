@@ -70,14 +70,14 @@ async def main(tickets: list):
                 if open_price > close_price:  # open price > close price
                     if db("count", candle.get("symbol")) == 1:
                         db("remove", candle.get("symbol"))
-                        msg = f'Sell \t\t{candle.get("symbol")} \t{open_price=} \t{close_price=}'
+                        msg = f'<b style="color: green">Sell \t\t{candle.get("symbol")} \t{open_price=} \t{close_price=}</b>'
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
                 elif open_price < close_price:
                     if db("count", candle.get("symbol")) == 0:
                         db("update", candle.get("symbol"), funds=199.22)
-                        msg = f'Buy \t\t{candle.get("symbol")} \t{open_price=} \t{close_price=}'
+                        msg = f'<b style="color: red">Buy \t\t{candle.get("symbol")} \t{open_price=} \t{close_price=}</b>'
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
@@ -91,18 +91,7 @@ async def main(tickets: list):
         await asyncio.sleep(60)
 
 
-Tickets = [
-    INTEREST_TICKET80,
-    INTEREST_TICKET160,
-    INTEREST_TICKET240,
-    INTEREST_TICKET320,
-    INTEREST_TICKET400,
-    INTEREST_TICKET480,
-    INTEREST_TICKET720,
-    INTEREST_TICKET560,
-    INTEREST_TICKET640,
-    INTEREST_TICKET800,
-]
+Tickets = [    INTEREST_TICKET80]
 
 
 async def run():
