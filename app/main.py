@@ -81,12 +81,24 @@ async def main():
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
-    symbols = ",".join(
-        [
-            ticket + TIME_SCALP
-            for ticket in ["JTO-USDT", "UTK-USDT", "SNS-USDT", "DOVI-USDT", "SEAM-USDT"]
-        ]
-    )
+    ttt = [
+        "JTO-USDT",
+        "UTK-USDT",
+        "SNS-USDT",
+        "DOVI-USDT",
+        "SEAM-USDT",
+        "IRL-USDT",
+        "SOLS-USDT",
+        "POLYX-USDT",
+        "SCPT-USDT",
+        "TAO-USDT",
+        "TURT-USDT",
+        "BIIS-USDT",
+        "ARTY-USDT",
+        "GRAPE-USDT",
+    ]
+
+    symbols = ",".join([ticket + TIME_SCALP for ticket in ttt])
 
     ws_client = await KucoinWsClient.create(None, WsToken(), deal_msg, private=False)
 
