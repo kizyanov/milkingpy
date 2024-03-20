@@ -9,6 +9,8 @@ INTEREST_TICKET = [
     "XMR-USDT",
     "ATOM-USDT",
     "FTM-USDT",
+]
+e = [
     "VSYS-USDT",
     "CHR-USDT",
     "COTI-USDT",
