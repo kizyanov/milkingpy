@@ -9,8 +9,6 @@ INTEREST_TICKET = [
     "XMR-USDT",
     "ATOM-USDT",
     "FTM-USDT",
-]
-e = [
     "VSYS-USDT",
     "CHR-USDT",
     "COTI-USDT",
@@ -101,8 +99,6 @@ e = [
     "CTI-USDT",
     "PLU-USDT",
     "GRT-USDT",
-]
-t = [
     "CAS-USDT",
     "REVV-USDT",
     "1INCH-USDT",
