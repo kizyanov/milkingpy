@@ -5,18 +5,7 @@ from kucoin.client import WsToken
 from decouple import config, Csv
 import aiohttp
 from aiotinydb import AIOTinyDB
-from interesticker import (
-    INTEREST_TICKET80,
-    INTEREST_TICKET160,
-    INTEREST_TICKET240,
-    INTEREST_TICKET320,
-    INTEREST_TICKET400,
-    INTEREST_TICKET480,
-    INTEREST_TICKET720,
-    INTEREST_TICKET560,
-    INTEREST_TICKET640,
-    INTEREST_TICKET800,
-)
+
 from tinydb import Query
 
 symbol_status = {}
@@ -57,9 +46,7 @@ async def send_telegram_msg(msg: str):
 
 async def main():
 
-    k = config("TICKETS", cast=Csv(str))
-    logger.debug(k)
-    logger.debug(type(k))
+    tickets = config("TICKETS", cast=Csv(str))
 
     async def deal_msg(msg):
         match msg:
@@ -85,24 +72,7 @@ async def main():
                         logger.debug(msg)
                         await send_telegram_msg(msg)
 
-    ttt = [
-        "JTO-USDT",
-        "UTK-USDT",
-        "SNS-USDT",
-        "DOVI-USDT",
-        "SEAM-USDT",
-        "IRL-USDT",
-        "SOLS-USDT",
-        "POLYX-USDT",
-        "SCPT-USDT",
-        "TAO-USDT",
-        "TURT-USDT",
-        "BIIS-USDT",
-        "ARTY-USDT",
-        "GRAPE-USDT",
-    ]
-
-    symbols = ",".join([ticket + TIME_SCALP for ticket in INTEREST_TICKET80])
+    symbols = ",".join([ticket + TIME_SCALP for ticket in tickets])
 
     ws_client = await KucoinWsClient.create(None, WsToken(), deal_msg, private=False)
 
