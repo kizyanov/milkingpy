@@ -7,3 +7,5 @@ services:
     image: kizyanov/milk:latest
     env_file:
       - .env
+    environment:
+      - TICKETS=BTC-USDT,JTO-USDT,UTK-USDT

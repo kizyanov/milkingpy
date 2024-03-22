@@ -2,7 +2,7 @@ import asyncio
 from loguru import logger
 from kucoin.ws_client import KucoinWsClient
 from kucoin.client import WsToken
-from decouple import config
+from decouple import config, Csv
 import aiohttp
 from aiotinydb import AIOTinyDB
 from interesticker import (
@@ -56,6 +56,10 @@ async def send_telegram_msg(msg: str):
 
 
 async def main():
+
+    k = config("TICKETS", cast=Csv(int))
+    logger.debug(k)
+    logger.debug(type(k))
 
     async def deal_msg(msg):
         match msg:
