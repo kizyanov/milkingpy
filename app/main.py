@@ -21,7 +21,7 @@ from tinydb import Query
 
 symbol_status = {}
 
-TIME_SCALP = "_1day"
+TIME_SCALP = "_1hour"
 
 Tickert = Query()
 
@@ -98,7 +98,7 @@ async def main():
         "GRAPE-USDT",
     ]
 
-    symbols = ",".join([ticket + TIME_SCALP for ticket in ttt])
+    symbols = ",".join([ticket + TIME_SCALP for ticket in INTEREST_TICKET80])
 
     ws_client = await KucoinWsClient.create(None, WsToken(), deal_msg, private=False)
 
