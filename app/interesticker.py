@@ -1,4 +1,20 @@
-INTEREST_TICKET80 = ["BTC-USDT"]
+INTEREST_TICKET80 = [
+    "BTC-USDT",
+    "JTO-USDT",
+    "UTK-USDT",
+    "SNS-USDT",
+    "DOVI-USDT",
+    "SEAM-USDT",
+    "IRL-USDT",
+    "SOLS-USDT",
+    "POLYX-USDT",
+    "SCPT-USDT",
+    "TAO-USDT",
+    "TURT-USDT",
+    "BIIS-USDT",
+    "ARTY-USDT",
+    "GRAPE-USDT",
+]
 t = [
     "SUI-USDT",
     "APT-USDT",
