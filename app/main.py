@@ -57,7 +57,7 @@ async def send_telegram_msg(msg: str):
 
 async def main():
 
-    k = config("TICKETS", cast=Csv(int))
+    k = config("TICKETS", cast=Csv(str))
     logger.debug(k)
     logger.debug(type(k))
 
