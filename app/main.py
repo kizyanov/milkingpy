@@ -72,7 +72,12 @@ async def main():
                         percent_dirty_profit = (get_cost / close_price) * 100 - 100
                         logger.debug(f"{percent_dirty_profit=}")
                         clear_percent = percent_dirty_profit - fee - fee
-                        msg = f"Sell \t\t{symbol} \t\topen:{open_price} \t\tclose:{close_price} \t\tpr:{clear_percent:.3f}%"
+
+                        if clear_percent > 0:
+                            emoji = "✅"
+                        else:
+                            emoji = "❌"
+                        msg = f"{emoji} Sell \t\t{symbol} \t\topen:{open_price} \t\tclose:{close_price} \t\tpr:{clear_percent:.3f}%"
                         logger.debug(msg)
                         await send_telegram_msg(msg)
                         db("remove", symbol)
