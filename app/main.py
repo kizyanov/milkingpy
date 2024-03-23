@@ -15,22 +15,25 @@ TIME_SCALP = "_1hour"
 Tickert = Query()
 
 storage = {}
+fee = 0.1
 
 
-def db(command: str, ticket: str, funds: float | None = None):
+def db(command: str, ticket: str, cost: float, funds: float | None = None):
     result = 0
     match command:
         case "remove":
             storage.pop(ticket)
         case "update":
-            storage[ticket] = funds
+            storage[ticket] = {"funds": funds, "cost": cost}
         case "count":
             result = int(ticket in storage)
+        case "cost":
+            result = storage[ticket]["cost"]
     return result
 
 
 async def send_telegram_msg(msg: str):
-    """."""
+    """Отправка сообщения в телеграмм."""
     async with aiohttp.ClientSession() as session:
         async with session.post(
             f"https://api.telegram.org/bot{config('TELEGRAM_BOT_API_KEY', cast=str)}/sendMessage",
@@ -45,7 +48,7 @@ async def send_telegram_msg(msg: str):
 
 
 async def main():
-    
+
     tickets = config("TICKETS", cast=Csv(str))
     logger.debug(f"Trade for {len(tickets)} tickets, enjoy!")
 
@@ -58,20 +61,25 @@ async def main():
             }:
                 open_price = float(candle.get("candles")[1])
                 close_price = float(candle.get("candles")[2])
+                symbol = candle.get("symbol")
 
-                if open_price > close_price:  # open price > close price
-                    if db("count", candle.get("symbol")) == 1:
-                        db("remove", candle.get("symbol"))
-                        msg = f'Sell \t\t{candle.get("symbol")} \t\topen:{open_price} \t\tclose:{close_price} \t\tpr:{(open_price/close_price) * 100 -100:.3f}%'
+                if open_price > close_price:
+                    if db("count", symbol) == 1:
+                        get_cost = db("cost", symbol)
+                        logger.debug(f"{get_cost=}")
+                        percent_dirty_profit = (get_cost / close_price) * 100 - 100
+                        logger.debug(f"{percent_dirty_profit=}")
+                        clear_percent = percent_dirty_profit - fee - fee
+                        msg = f"Sell \t\t{symbol} \t\topen:{open_price} \t\tclose:{close_price} \t\tpr:{clear_percent:.3f}%"
                         logger.debug(msg)
                         await send_telegram_msg(msg)
+                        db("remove", symbol)
 
                 elif open_price < close_price:
-                    if db("count", candle.get("symbol")) == 0:
-                        db("update", candle.get("symbol"), funds=199.22)
-                        msg = f'Buy \t\t{candle.get("symbol")} \t\topen:{open_price} \t\tclose:{close_price} \t\tpr:{(close_price/open_price) * 100 -100:.3f}%'
+                    if db("count", symbol) == 0:
+                        db("update", symbol, cost=close_price, funds=199.22)
+                        msg = f"Buy \t\t{symbol} \t\topen:{open_price} \t\tclose:{close_price} \t\tpr:{(close_price/open_price) * 100 -100:.3f}%"
                         logger.debug(msg)
-                        await send_telegram_msg(msg)
 
     symbols = ",".join([ticket + TIME_SCALP for ticket in tickets])
 
