@@ -18,7 +18,9 @@ storage = {}
 fee = 0.1
 
 
-def db(command: str, ticket: str, cost: float, funds: float | None = None):
+def db(
+    command: str, ticket: str, cost: float | None = None, funds: float | None = None
+):
     result = 0
     match command:
         case "remove":
