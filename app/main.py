@@ -105,16 +105,18 @@ async def main1():
     client = Market()
 
     while True:
-        profit = 0
+        profit_dirty = 0
 
         for i in INTEREST_TICKET:
             data = float(client.get_24h_stats(i)["changeRate"])
             logger.debug(f"{i} \t {data}")
-            profit += data
+            profit_dirty += data
 
-        logger.debug(f"PROFIT: {profit}")
+        profit = profit_dirty / total_coins * 100
 
-        await send_telegram_msg(f"Profit is: {profit}")
+        logger.debug(f"PROFIT: {profit:.2f} %")
+
+        await send_telegram_msg(f"Profit is: {profit:.2f}%")
 
         await asyncio.sleep(60 * 60 * 24)
 
