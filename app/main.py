@@ -118,7 +118,7 @@ async def main1():
 
         await send_telegram_msg(f"Profit is: {profit:.2f}%")
 
-        await asyncio.sleep(60 * 60 * 24)
+        await asyncio.sleep(60 * 60)
 
 
 asyncio.run(main1())
