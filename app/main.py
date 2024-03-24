@@ -105,14 +105,12 @@ async def main1():
     client = Market()
 
     while True:
-        chunk_coins = 0
+        profit = 0
 
         for i in INTEREST_TICKET:
             data = float(client.get_24h_stats(i)["changeRate"])
             logger.debug(f"{i} \t {data}")
-            chunk_coins += data
-
-        profit = total_coins / chunk_coins
+            profit += data
 
         logger.debug(f"PROFIT: {profit}")
 
