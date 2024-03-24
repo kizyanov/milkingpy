@@ -109,7 +109,7 @@ async def main1():
 
         for i in INTEREST_TICKET:
             data = float(client.get_24h_stats(i)["changeRate"])
-            logger.debug(data)
+            logger.debug(f"{i} \t {data}")
             chunk_coins += data
 
         profit = total_coins / chunk_coins
