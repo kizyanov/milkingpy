@@ -5,8 +5,9 @@ from kucoin.client import WsToken
 from decouple import config, Csv
 import aiohttp
 from aiotinydb import AIOTinyDB
-
+from interesticker import INTEREST_TICKET
 from tinydb import Query
+from kucoin.client import Market
 
 symbol_status = {}
 
@@ -98,4 +99,26 @@ async def main():
         await asyncio.sleep(60)
 
 
-asyncio.run(main())
+async def main1():
+    total_coins = len(INTEREST_TICKET)
+
+    client = Market()
+
+    while True:
+        chunk_coins = 0
+
+        for i in INTEREST_TICKET:
+            data = float(client.get_24h_stats(i)["changeRate"])
+            logger.debug(data)
+            chunk_coins += data
+
+        profit = total_coins / chunk_coins
+
+        logger.debug(f"PROFIT: {profit}")
+
+        await send_telegram_msg(f"Profit is: {profit}")
+
+        await asyncio.sleep(60 * 60 * 24)
+
+
+asyncio.run(main1())
