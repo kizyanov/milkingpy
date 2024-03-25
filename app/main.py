@@ -109,7 +109,6 @@ async def main1():
     while True:
 
         now = datetime.now(tz=UTC).strftime("%H.%M.%S")
-        logger.debug(now)
         if now in [
             "00.00.00",
             "01.00.00",
