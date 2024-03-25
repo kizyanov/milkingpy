@@ -1,4 +1,5 @@
 import asyncio
+import time
 from loguru import logger
 from kucoin.ws_client import KucoinWsClient
 from kucoin.client import WsToken
@@ -8,8 +9,8 @@ from aiotinydb import AIOTinyDB
 from interesticker import INTEREST_TICKET
 from tinydb import Query
 from kucoin.client import Market
-
-from datetime import datetime, UTC
+from requests.exceptions import ReadTimeout
+from datetime import datetime, UTC, timedelta
 
 symbol_status = {}
 
@@ -101,6 +102,15 @@ async def main():
         await asyncio.sleep(60)
 
 
+def req(client, i) -> tuple[float, bool]:
+    try:
+        data = float(client.get_24h_stats(i)["changeRate"])
+        return data, True
+    except ReadTimeout:
+        logger.debug("Get ReadTimeout")
+        return 0.0, False
+
+
 async def main1():
     total_coins = len(INTEREST_TICKET)
 
@@ -108,7 +118,7 @@ async def main1():
 
     while True:
 
-        now = datetime.now(tz=UTC).strftime("%H.%M.%S")
+        now = (datetime.now(tz=UTC) + timedelta(hours=3)).strftime("%H.%M.%S")
         if now in [
             "00.00.00",
             "01.00.00",
@@ -139,7 +149,14 @@ async def main1():
             profit_dirty = 0
 
             for i in INTEREST_TICKET:
-                data = float(client.get_24h_stats(i)["changeRate"])
+
+                while True:
+                    time.sleep(0.1)
+                    data, result = req(client, i)
+
+                    if result:
+                        break
+
                 logger.debug(f"{i} \t {data}")
                 profit_dirty += data
 
