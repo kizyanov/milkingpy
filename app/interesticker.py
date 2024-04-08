@@ -348,7 +348,6 @@ INTEREST_TICKET = [
     "UFO-USDT",
     "CHMB-USDT",
     "GEEQ-USDT",
-    "ORC-USDT",
     "PEOPLE-USDT",
     "ADS-USDT",
     "OCEAN-USDT",
