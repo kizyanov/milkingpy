@@ -14,7 +14,7 @@ from datetime import datetime, UTC, timedelta
 
 symbol_status = {}
 
-TIME_SCALP = "_1hour"
+TIME_SCALP = "_1week"
 
 Tickert = Query()
 
@@ -169,4 +169,4 @@ async def main1():
         await asyncio.sleep(1)
 
 
-asyncio.run(main1())
+asyncio.run(main())
