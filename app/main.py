@@ -56,6 +56,7 @@ async def send_telegram_msg(msg: str):
 async def main():
     tickets = config("TICKETS", cast=Csv(str))
     logger.debug(f"Trade for {len(tickets)} tickets, enjoy!")
+    logger.debug(f"{tickets=}")
 
     async def deal_msg(msg):
         match msg:
