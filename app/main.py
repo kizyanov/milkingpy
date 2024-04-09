@@ -68,6 +68,7 @@ async def main():
                 open_price = float(candle.get("candles")[1])
                 close_price = float(candle.get("candles")[2])
                 symbol = candle.get("symbol")
+                logger.debug(f"{open_price=} {close_price=}")
 
                 if open_price > close_price:
                     if db("count", symbol) == 1:
