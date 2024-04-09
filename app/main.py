@@ -14,7 +14,7 @@ from datetime import datetime, UTC, timedelta
 
 symbol_status = {}
 
-TIME_SCALP = "_1day"
+TIME_SCALP = "_4hour"
 
 Tickert = Query()
 
