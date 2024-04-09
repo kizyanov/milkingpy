@@ -54,7 +54,6 @@ async def send_telegram_msg(msg: str):
 
 
 async def main():
-
     tickets = config("TICKETS", cast=Csv(str))
     logger.debug(f"Trade for {len(tickets)} tickets, enjoy!")
 
@@ -68,7 +67,6 @@ async def main():
                 open_price = float(candle.get("candles")[1])
                 close_price = float(candle.get("candles")[2])
                 symbol = candle.get("symbol")
-                logger.debug(f"{symbol=} {open_price=} {close_price=}")
 
                 if open_price > close_price:
                     if db("count", symbol) == 1:
