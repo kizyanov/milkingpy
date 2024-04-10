@@ -1,14 +1,12 @@
-version: '3.7'
-
 services:
-  milk:
+  milking:
     build:
       context: .
-    image: kizyanov/milk:latest
+    image: kizyanov/milking:latest
     env_file:
       - .env
     environment:
-      - TICKETS=BTC-USDT,JTO-USDT,UTK-USDT
+      - TICKETS=IMX-USDT
 
 # services:
 #   milking_1:

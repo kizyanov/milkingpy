@@ -170,4 +170,4 @@ async def main1():
         await asyncio.sleep(1)
 
 
-asyncio.run(main())
+asyncio.run(main1())
