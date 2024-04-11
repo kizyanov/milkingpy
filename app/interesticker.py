@@ -700,7 +700,6 @@ INTEREST_TICKET = [
     "SMOLE-USDT",
     "VENOM-USDT",
     "ENA-USDT",
-    "USDE-USDT",
     "W-USDT",
     "MEW-USDT",
     "ZEUS-USDT",
