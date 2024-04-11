@@ -638,7 +638,6 @@ INTEREST_TICKET = [
     "RATS-USDT",
     "VRTX-USDT",
     "ROOT-USDT",
-    "WBTC-USDT",
     "LOOM-USDT",
     "ELF-USDT",
     "DCR-USDT",
