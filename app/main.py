@@ -69,7 +69,7 @@ def get_account_info():
 
 async def main():
     async def event(msg):
-        match msg:
+        match msg: # Add Stop Order Event
             case {
                 "data": dict() as candle,
                 "type": "message",
