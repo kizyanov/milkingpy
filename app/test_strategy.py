@@ -1,7 +1,6 @@
 from interesticker import INTEREST_TICKET
 
 import requests
-import time
 
 t = []
 
@@ -10,7 +9,7 @@ for item in INTEREST_TICKET:
     data = requests.get(
         url=f"https://api.kucoin.com/api/v1/market/candles?type=1day&symbol={item}"
     ).json()["data"][::-1]
-   
+
     l = []
 
     ll = len(data)
@@ -44,8 +43,8 @@ day_percent = []
 for i in range(99):
     s = 0
     for o in percent:
-        s+=o[i]
-    day_percent.append(round(s/len(percent), 3))
+        s += o[i]
+    day_percent.append(round(s / len(percent), 3))
 
 print(t)
 print(day_percent)
