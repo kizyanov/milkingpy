@@ -48,17 +48,20 @@ def get_account_info():
 
     for asset in user.get_account_list():
         if asset["type"] == "trade":
-            if asset["currency"] != base_stable: # Получаем все ордера в которых участвует этот актив
+            if (
+                asset["currency"] != base_stable
+            ):  # Получаем все ордера в которых участвует этот актив
                 symbol_order = order.get_order_list(
                     **{
                         "symbol": f'{asset["currency"]}-{base_stable}',
                         "status": "active",
                     }
                 )
-                book[asset["currency"]] = {
-                    "available": asset["available"],
-                    "orderId": symbol_order['items'][0]['id'],
-                }
+                for order in symbol_order["items"]:
+                    book[asset["currency"]] = {
+                        "available": asset["available"],
+                        "orderId": order["id"],
+                    }
             else:
                 book[asset["currency"]] = {"available": asset["available"]}
     logger.debug(book)
@@ -88,7 +91,16 @@ async def main():
                 "topic": "/spotMarket/tradeOrdersV2",
             }:
                 logger.debug(order)
-
+                symbol = order["symbol"].replace(f"-{base_stable}", "")
+                match order["type"]:
+                    case "canceled":
+                        del book[symbol]["orderId"]
+                    case "open":
+                        if symbol in book:
+                            book[symbol]["orderId"] = order["orderId"]
+                        else:
+                            book[symbol] = {"available": 0, "orderId": order["orderId"]}
+                logger.debug(book)
     get_account_info()
 
     client = WsToken(
