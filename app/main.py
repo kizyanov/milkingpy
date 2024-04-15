@@ -101,6 +101,15 @@ async def main():
                         else:
                             book[symbol] = {"available": 0, "orderId": order["orderId"]}
                 logger.debug(book)
+            case {
+                "data": dict() as order,
+                "type": "message",
+                "subject": "stopOrder",
+            }:
+                symbol = order["symbol"].replace(f"-{base_stable}", "")
+                if order['type'] == 'cancel':
+                    if symbol in book:
+                        del book[symbol]["orderId"]
     get_account_info()
 
     client = WsToken(
@@ -112,11 +121,13 @@ async def main():
 
     balance = await KucoinWsClient.create(None, client, event, private=True)
     order = await KucoinWsClient.create(None, client, event, private=True)
+    cancel_order = await KucoinWsClient.create(None, client, event, private=True)
     candle = await KucoinWsClient.create(None, WsToken(), event, private=False)
 
     await balance.subscribe("/account/balance")
     await candle.subscribe("/market/candles:BTC-USDT_1hour")
     await order.subscribe("/spotMarket/tradeOrdersV2")
+    await cancel_order.subscribe("/spotMarket/advancedOrders")
 
     while True:
         await asyncio.sleep(60)
