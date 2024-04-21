@@ -4,15 +4,35 @@ from kucoin.client import WsToken
 from decouple import config
 import aiohttp
 from loguru import logger
-
-from kucoin.client import User, Trade
-
-book = {}
+import json
+import hmac
+import hashlib
+import base64
+import time
+from urllib.parse import urljoin
+from uuid import uuid1
+from kucoin.client import User, Trade, Market
 
 key = config("KEY", cast=str)
 secret = config("SECRET", cast=str)
 passphrase = config("PASSPHRASE", cast=str)
 base_stable = config("BASE_STABLE", cast=str)
+currency = config("CURRENCY", cast=str)
+time_shift = config("TIME_SHIFT", cast=str)
+base_stake = config("BASE_STAKE", cast=int)
+fake_price_shift = config("FAKE_PRICE_SHIFT", cast=int)
+
+base_uri = "https://api.kucoin.com"
+
+book = {currency: {"side": "buy", "orderId": "1", "openprice": 1}}
+
+
+headers_base = {
+    "KC-API-KEY": key,
+    "Content-Type": "application/json",
+    "KC-API-KEY-VERSION": "2",
+    "User-Agent": "kucoin-python-sdk/2",
+}
 
 
 async def send_telegram_msg(msg: str):
@@ -46,37 +66,195 @@ def get_account_info():
         is_sandbox=False,
     )
 
+    market = Market(
+        key=key,
+        secret=secret,
+        passphrase=passphrase,
+        is_sandbox=False,
+    )
+
     for asset in user.get_account_list():
-        if asset["type"] == "trade":
+        logger.debug(asset)
+        if asset["type"] == "trade":  # Get assert only on trade account
             if (
                 asset["currency"] != base_stable
-            ):  # Получаем все ордера в которых участвует этот актив
+            ):  # Получаем все ордера в которых участвует этот актив, кроме USDT
                 symbol_order = order.get_order_list(
                     **{
                         "symbol": f'{asset["currency"]}-{base_stable}',
-                        "status": "active",
+                        # 'type':"limit_stop",
+                        # "status":"active",
                     }
                 )
-                for order in symbol_order["items"]:
-                    book[asset["currency"]] = {
-                        "available": asset["available"],
-                        "orderId": order["id"],
+
+                d = order.get_all_stop_order_details(
+                    **{
+                        "symbol": f'{asset["currency"]}-{base_stable}',
                     }
+                )
+                logger.debug(d)
+                for order in symbol_order["items"]:
+
+                    # logger.debug(order)
+                    pass
+
+                    # book[asset["currency"]] = {
+                    # "available": asset["available"],
+                    # "orderId": order["id"],
+                    # }
+
+                    # priceIncrement = market.get_symbol_list_v2()
+
+                    # for ff in priceIncrement:
+                    # if ff['baseCurrency'] in book:
+                    # book[ff['baseCurrency']].update({"priceIncrement": ff['priceIncrement']})
+
             else:
                 book[asset["currency"]] = {"available": asset["available"]}
     logger.debug(book)
 
 
+# Нужно как-то выкачать priceIncrement
+
+d = {"sell": "loss", "buy": "entry"}
+
+
+def get_payload(side: str, symbol: str, price: int, priceIncrement: str):
+    place = priceIncrement.split("1")[0].count("0")
+    return json.dumps(
+        {
+            "clientOid": "".join([each for each in str(uuid1()).split("-")]),
+            "side": side,
+            "type": "limit",
+            "stop": d[side],
+            "stopPrice": str(price),
+            "tradyType": "TRADE",
+            "price": str(price),
+            "timeInForce": "FOK",
+            "symbol": symbol,
+            "size": f"{float(base_stake / price):.{place}f}",
+        }
+    )
+
+
+def encrypted_msg(msg: str) -> str:
+    """."""
+    return base64.b64encode(
+        hmac.new(secret.encode("utf-8"), msg.encode("utf-8"), hashlib.sha256).digest()
+    ).decode()
+
+
+async def make_stop_limit_order(
+    side: str,
+    price: int,
+    method: str = "POST",
+    method_uri: str = "/api/v1/stop-order",
+):
+    """Make stop limit order by price."""
+
+    now_time = int(time.time()) * 1000
+
+    data_json = get_payload(
+        side=side,
+        symbol=f"{currency}-{base_stable}",
+        price=price,
+        priceIncrement="0.00001",
+    )
+
+    uri_path = method_uri + data_json
+    str_to_sign = str(now_time) + method + uri_path
+
+    headers = {
+        "KC-API-SIGN": encrypted_msg(str_to_sign),
+        "KC-API-TIMESTAMP": str(now_time),
+        "KC-API-PASSPHRASE": encrypted_msg(passphrase),
+    }
+    headers.update(**headers_base)
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            urljoin(base_uri, method_uri),
+            headers=headers,
+            data=data_json,
+        ) as response:
+            result = await response.json()
+            if result["code"] == "200000":
+                return result["data"]["orderId"]
+
+
+async def cancel_limit_stop_order(
+    orderId: str,
+    method: str = "DELETE",
+    method_uri: str = "/api/v1/stop-order/",
+):
+
+    if orderId == "1":
+        return
+
+    now_time = int(time.time()) * 1000
+
+    uri_path = method_uri + orderId
+    str_to_sign = str(now_time) + method + uri_path
+
+    headers = {
+        "KC-API-SIGN": encrypted_msg(str_to_sign),
+        "KC-API-TIMESTAMP": str(now_time),
+        "KC-API-PASSPHRASE": encrypted_msg(passphrase),
+    }
+    headers.update(**headers_base)
+
+    async with aiohttp.ClientSession() as session:
+        async with session.delete(
+            urljoin(base_uri, uri_path),
+            headers=headers,
+        ) as response:
+            result = await response.json()
+
+
 async def main():
     async def event(msg):
-        match msg: # Add Stop Order Event
+        match msg:  # Add Stop Order Event
             case {
                 "data": dict() as candle,
                 "type": "message",
                 "subject": "trade.candles.update",
             }:
-                pass
-                # logger.debug(f"Candles Update: {msg}")
+                symbol = candle["symbol"].replace(f"-{base_stable}", "")
+
+                open_price = float(candle["candles"][1])
+                close_price = float(candle["candles"][2])
+
+                if open_price > close_price:
+                    if book[symbol]["side"] == "sell" or (
+                        book[symbol]["side"] == "buy"
+                        and book[symbol]["openprice"] > open_price
+                    ):
+                        logger.debug("BUY")
+                        orderId = await make_stop_limit_order(
+                            "buy", open_price + fake_price_shift
+                        )
+                        await cancel_limit_stop_order(book[symbol]["orderId"])
+                        book[symbol] = {
+                            "orderId": orderId,
+                            "side": "buy",
+                            "openprice": open_price,
+                        }
+
+                else:
+                    if book[symbol]["side"] == "buy" or (
+                        book[symbol]["side"] == "sell"
+                        and book[symbol]["openprice"] < open_price
+                    ):
+                        logger.debug("SELL")
+                        orderId = await make_stop_limit_order(
+                            "sell", open_price - fake_price_shift
+                        )
+                        await cancel_limit_stop_order(book[symbol]["orderId"])
+                        book[symbol] = {
+                            "orderId": orderId,
+                            "side": "sell",
+                            "openprice": open_price,
+                        }
             case {
                 "data": dict() as balance,
                 "type": "message",
@@ -100,17 +278,19 @@ async def main():
                             book[symbol]["orderId"] = order["orderId"]
                         else:
                             book[symbol] = {"available": 0, "orderId": order["orderId"]}
-                logger.debug(book)
+                logger.info(book)
+
             case {
                 "data": dict() as order,
                 "type": "message",
                 "subject": "stopOrder",
             }:
                 symbol = order["symbol"].replace(f"-{base_stable}", "")
-                if order['type'] == 'cancel':
+                if order["type"] == "cancel":
                     if symbol in book:
                         del book[symbol]["orderId"]
-    get_account_info()
+
+    # get_account_info()
 
     client = WsToken(
         key=key,
@@ -119,15 +299,15 @@ async def main():
         url="https://openapi-v2.kucoin.com",
     )
 
-    balance = await KucoinWsClient.create(None, client, event, private=True)
-    order = await KucoinWsClient.create(None, client, event, private=True)
-    cancel_order = await KucoinWsClient.create(None, client, event, private=True)
+    # balance = await KucoinWsClient.create(None, client, event, private=True)
+    # order = await KucoinWsClient.create(None, client, event, private=True)
+    # cancel_order = await KucoinWsClient.create(None, client, event, private=True)
     candle = await KucoinWsClient.create(None, WsToken(), event, private=False)
 
-    await balance.subscribe("/account/balance")
-    await candle.subscribe("/market/candles:BTC-USDT_1hour")
-    await order.subscribe("/spotMarket/tradeOrdersV2")
-    await cancel_order.subscribe("/spotMarket/advancedOrders")
+    # await balance.subscribe("/account/balance")
+    await candle.subscribe(f"/market/candles:{currency}-{base_stable}_{time_shift}")
+    # await order.subscribe("/spotMarket/tradeOrdersV2")
+    # await cancel_order.subscribe("/spotMarket/advancedOrders")
 
     while True:
         await asyncio.sleep(60)
