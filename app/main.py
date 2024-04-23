@@ -211,7 +211,12 @@ async def cancel_limit_stop_order(
             result = await response.json()
 
 
+test_list = []
+b = {"side": "sell"}
+
+
 async def main():
+
     async def event(msg):
         match msg:  # Add Stop Order Event
             case {
@@ -219,42 +224,34 @@ async def main():
                 "type": "message",
                 "subject": "trade.candles.update",
             }:
-                symbol = candle["symbol"].replace(f"-{base_stable}", "")
 
                 open_price = float(candle["candles"][1])
                 close_price = float(candle["candles"][2])
 
-                if open_price > close_price:
-                    if book[symbol]["side"] == "sell" or (
-                        book[symbol]["side"] == "buy"
-                        and book[symbol]["openprice"] > open_price
-                    ):
-                        logger.debug("BUY")
-                        orderId = await make_stop_limit_order(
-                            "buy", open_price + fake_price_shift
-                        )
-                        await cancel_limit_stop_order(book[symbol]["orderId"])
-                        book[symbol] = {
-                            "orderId": orderId,
-                            "side": "buy",
-                            "openprice": open_price,
-                        }
+                if len(test_list) == 0:
+                    test_list.append(open_price)
+                    logger.info(f"{len(test_list)} {test_list}")
 
-                else:
-                    if book[symbol]["side"] == "buy" or (
-                        book[symbol]["side"] == "sell"
-                        and book[symbol]["openprice"] < open_price
-                    ):
-                        logger.debug("SELL")
-                        orderId = await make_stop_limit_order(
-                            "sell", open_price - fake_price_shift
-                        )
-                        await cancel_limit_stop_order(book[symbol]["orderId"])
-                        book[symbol] = {
-                            "orderId": orderId,
-                            "side": "sell",
-                            "openprice": open_price,
-                        }
+                if open_price != test_list[-1]:
+
+                    if len(test_list) == 3:
+                        test_list.pop(0)
+
+                    test_list.append(open_price)
+
+                avg = round(sum(test_list) / len(test_list), 2)
+                logger.info(f"{len(test_list)} {avg} {test_list}")
+
+                if avg < close_price and b["side"] != "buy":
+                    logger.info("buy")
+                    b["side"] = "buy"
+                    await send_telegram_msg('buy')
+
+                elif avg > close_price and b["side"] != "sell":
+                    logger.info("sell")
+                    b["side"] = "sell"
+                    await send_telegram_msg('sell')
+
             case {
                 "data": dict() as balance,
                 "type": "message",
