@@ -240,7 +240,6 @@ async def main():
                     test_list.append(open_price)
 
                 avg = round(sum(test_list) / len(test_list), 2)
-                logger.info(f"{len(test_list)} {avg} {test_list}")
 
                 if avg < close_price and b["side"] != "buy":
                     logger.info("buy")
