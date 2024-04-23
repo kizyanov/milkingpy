@@ -234,7 +234,7 @@ async def main():
 
                 if open_price != test_list[-1]:
 
-                    if len(test_list) == 3:
+                    if len(test_list) == 20:
                         test_list.pop(0)
 
                     test_list.append(open_price)
