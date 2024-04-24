@@ -17,8 +17,9 @@ key = config("KEY", cast=str)
 secret = config("SECRET", cast=str)
 passphrase = config("PASSPHRASE", cast=str)
 base_stable = config("BASE_STABLE", cast=str)
-currencys = config("CURRENCYS", cast=str)
+currency = config("CURRENCY", cast=str)
 time_shift = config("TIME_SHIFT", cast=str)
+base_stake = config("BASE_STAKE", cast=int)
 
 base_uri = "https://api.kucoin.com"
 
@@ -60,7 +61,7 @@ headers_base = {
 }
 
 
-async def send_telegram_msg(msg: str) :
+async def send_telegram_msg(msg: str):
     """Отправка сообщения в телеграмм."""
     async with (
         aiohttp.ClientSession() as session,
@@ -144,6 +145,24 @@ def get_payload(side: str, symbol: str, price: int, priceIncrement: str):
     )
 
 
+def get_payload2(
+    side: str,
+    symbol: str,
+    price: int,
+    size: str,
+):
+    return json.dumps(
+        {
+            "clientOid": "".join([each for each in str(uuid1()).split("-")]),
+            "side": side,
+            "type": "limit",
+            "price": str(price),
+            "symbol": symbol,
+            "size": size,
+        },
+    )
+
+
 def encrypted_msg(msg: str) -> str:
     """."""
     return base64.b64encode(
@@ -191,6 +210,48 @@ async def make_stop_limit_order(
             return result["data"]["orderId"]
 
 
+async def make_limit_order(
+    side: str,
+    price: int,
+    symbol: str,
+    size: str,
+    method: str = "POST",
+    method_uri: str = "/api/v1/orders",
+):
+    """Make limit order by price."""
+
+    now_time = int(time.time()) * 1000
+
+    data_json = get_payload2(
+        side=side,
+        symbol=symbol,
+        price=price,
+        size=size,
+    )
+
+    uri_path = method_uri + data_json
+    str_to_sign = str(now_time) + method + uri_path
+
+    headers = {
+        "KC-API-SIGN": encrypted_msg(str_to_sign),
+        "KC-API-TIMESTAMP": str(now_time),
+        "KC-API-PASSPHRASE": encrypted_msg(passphrase),
+    }
+    headers.update(**headers_base)
+
+    async with (
+        aiohttp.ClientSession() as session,
+        session.post(
+            urljoin(base_uri, method_uri),
+            headers=headers,
+            data=data_json,
+        ) as response,
+    ):
+        result = await response.json()
+        if result["code"] == "200000":
+            return result["data"]["orderId"]
+
+
 async def cancel_limit_stop_order(
     orderId: str,
     method: str = "DELETE",
@@ -212,10 +273,13 @@ async def cancel_limit_stop_order(
     }
     headers.update(**headers_base)
 
-    async with aiohttp.ClientSession() as session, session.delete(
+    async with (
+        aiohttp.ClientSession() as session,
+        session.delete(
             urljoin(base_uri, uri_path),
             headers=headers,
-        ) as response:
+        ) as response,
+    ):
         result = await response.json()
 
 
@@ -232,12 +296,37 @@ async def change_account_balance(data: dict):
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
-    logger.debug(data)
+    # logger.debug(data)
+
+    if data["symbol"] in order_book:
+        if order_book[data["symbol"]]["open_price"] != data["candles"][1]:
+            # Новая свечка
+
+            baseIncrement = order_book[data["symbol"]]["baseIncrement"]
+            market_price = float(data["candles"][1])
+            size = f"{base_stake / market_price:.{baseIncrement}f}"
+            logger.info(f"{size=}")
+
+            await make_limit_order(
+                side="buy",
+                price=str(market_price),
+                symbol="BTC-USDT",
+                size=size,
+            )
+            order_book[data["symbol"]]["open_price"] = data["candles"][1]
+            logger.debug(order_book)
+    else:
+        order_book[data["symbol"]] = {
+            "open_price": data["candles"][1],
+            "baseIncrement": 7,
+            "sizeIncrement": 1,
+        }
+        logger.debug(order_book)
 
 
 async def change_order(data: dict):
     """Обработка изменений ордеров."""
-    logger.debug(data)
+    # logger.debug(data)
 
     # type=received
     # status=new
@@ -256,6 +345,21 @@ async def change_order(data: dict):
 
     # type=canceled
     # status=done
+
+    if data["status"] == "done" and data["type"] == "filled":
+        if data["side"] == "buy":
+            logger.success(f"Success buy:{data['symbol']}")
+            plus_one_percent = float(data["price"]) * 1.01
+            sizeIncrement = order_book[data["symbol"]]["sizeIncrement"]
+            await make_limit_order(
+                side="sell",
+                price=f"{plus_one_percent:.{sizeIncrement}f}",
+                symbol=data["symbol"],
+                size=data["size"],
+            )
+        elif data["side"] == "sell":
+            logger.success(f"Success sell:{data['symbol']}")
+            await send_telegram_msg(f'SELL:{data['symbol']}')
 
     match data["status"]:
         case "new":
@@ -292,8 +396,7 @@ async def main() -> None:
     logger.info("Start market to bulge")
     # /api/v1/orders?status=active&type=limit&symbol=BTC-USDT
 
-
-    async def event(msg:dict) -> None:
+    async def event(msg: dict) -> None:
         match msg:  # Add Stop Order Event
             case {
                 "data": dict() as candle,
@@ -319,12 +422,12 @@ async def main() -> None:
     # get_account_info()
 
     # balance = await KucoinWsClient.create(None, client, event, private=True)
-    # order = await KucoinWsClient.create(None, client, event, private=True)
+    order = await KucoinWsClient.create(None, client, event, private=True)
     candle = await KucoinWsClient.create(None, WsToken(), event, private=False)
 
     # await balance.subscribe("/account/balance")
     await candle.subscribe(f"/market/candles:{currency}-{base_stable}_{time_shift}")
-    # await order.subscribe("/spotMarket/tradeOrdersV2")
+    await order.subscribe("/spotMarket/tradeOrdersV2")
 
     while True:
         await asyncio.sleep(60)
