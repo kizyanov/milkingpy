@@ -394,6 +394,7 @@ async def change_order(data: dict):
 async def main() -> None:
     """Главная функция приложения."""
     logger.info("Start market to bulge")
+    await send_telegram_msg("Start market to bulge")
     # /api/v1/orders?status=active&type=limit&symbol=BTC-USDT
 
     async def event(msg: dict) -> None:
