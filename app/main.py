@@ -25,6 +25,8 @@ base_uri = "https://api.kucoin.com"
 
 order_book = {}
 
+background_tasks = set()
+
 user = User(
     key=key,
     secret=secret,
@@ -351,15 +353,28 @@ async def change_order(data: dict):
             logger.success(f"Success buy:{data['symbol']}")
             plus_one_percent = float(data["price"]) * 1.01
             sizeIncrement = order_book[data["symbol"]]["sizeIncrement"]
-            await make_limit_order(
-                side="sell",
-                price=f"{plus_one_percent:.{sizeIncrement}f}",
-                symbol=data["symbol"],
-                size=data["size"],
+
+            task = asyncio.create_task(
+                make_limit_order(
+                    side="sell",
+                    price=f"{plus_one_percent:.{sizeIncrement}f}",
+                    symbol=data["symbol"],
+                    size=data["size"],
+                )
             )
+
+            background_tasks.add(task)
+
+            task.add_done_callback(background_tasks.discard)
+
         elif data["side"] == "sell":
             logger.success(f"Success sell:{data['symbol']}")
-            await send_telegram_msg(f'SELL:{data['symbol']}')
+
+            task = asyncio.create_task(send_telegram_msg(f"SELL:{data['symbol']}"))
+
+            background_tasks.add(task)
+
+            task.add_done_callback(background_tasks.discard)
 
     match data["status"]:
         case "new":
