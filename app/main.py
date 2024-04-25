@@ -287,13 +287,11 @@ async def cancel_limit_stop_order(
 
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
-    logger.success(data)
-    msg = "Change account balance"
-    match data["relationEvent"]:
-        case "trade.setted":
-            await send_telegram_msg(msg)
-        case _:
-            pass
+    if data['currency'] =='USDT':
+        holdChange = float(data['holdChange'])
+        total = float(data['total'])
+        msg = f"Change account balance:{holdChange:.5f} total:{total:.5f}"
+        await send_telegram_msg(msg)
 
 
 async def change_candle(data: dict):
