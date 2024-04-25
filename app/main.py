@@ -437,11 +437,11 @@ async def main() -> None:
 
     # get_account_info()
 
-    # balance = await KucoinWsClient.create(None, client, event, private=True)
+    balance = await KucoinWsClient.create(None, client, event, private=True)
     order = await KucoinWsClient.create(None, client, event, private=True)
     candle = await KucoinWsClient.create(None, WsToken(), event, private=False)
 
-    # await balance.subscribe("/account/balance")
+    await balance.subscribe("/account/balance")
     await candle.subscribe(f"/market/candles:{currency}-{base_stable}_{time_shift}")
     await order.subscribe("/spotMarket/tradeOrdersV2")
 
