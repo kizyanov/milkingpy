@@ -77,7 +77,7 @@ async def send_telegram_msg(msg: str):
             },
         ) as response,
     ):
-        logger.info(response)
+        logger.info(f"Sent teleg:{response.status}")
 
 
 def get_account_info():
@@ -288,11 +288,16 @@ async def cancel_limit_stop_order(
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
     logger.info(data)
-    if data['currency'] =='USDT':
-        holdChange = float(data['holdChange'])
-        total = float(data['total'])
-        msg = f"Change account balance:{holdChange:.5f} total:{total:.5f}"
-        await send_telegram_msg(msg)
+    if data["currency"] == "USDT":
+        holdChange = float(data["holdChange"])
+        total = float(data["total"])
+        task = asyncio.create_task(
+            send_telegram_msg(f"Change account balance: {total:.2f} USDT")
+        )
+
+        background_tasks.add(task)
+
+        task.add_done_callback(background_tasks.discard)
 
 
 async def change_candle(data: dict):
@@ -368,12 +373,6 @@ async def change_order(data: dict):
 
         elif data["side"] == "sell":
             logger.success(f"Success sell:{data['symbol']}")
-
-            task = asyncio.create_task(send_telegram_msg(f"SELL:{data['symbol']}"))
-
-            background_tasks.add(task)
-
-            task.add_done_callback(background_tasks.discard)
 
     match data["status"]:
         case "new":
