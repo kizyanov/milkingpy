@@ -63,6 +63,29 @@ headers_base = {
 }
 
 
+symbol_list = {}
+
+for symbol in market.get_symbol_list_v2():
+    if "." in symbol["baseIncrement"] and "." in symbol["priceIncrement"]:
+        symbol_list.update(
+            {
+                symbol["symbol"]: {
+                    "baseIncrement": len(symbol["baseIncrement"].split(".")[1]),
+                    "sizeIncrement": len(symbol["priceIncrement"].split(".")[1]),
+                }
+            }
+        )
+
+    else:
+        symbol_list.update(
+            {
+                symbol["symbol"]: {
+                    "baseIncrement": len(symbol["baseIncrement"]),
+                    "sizeIncrement": len(symbol["priceIncrement"]),
+                }
+            }
+        )
+
 async def send_telegram_msg(msg: str):
     """Отправка сообщения в телеграмм."""
     async with (
@@ -305,6 +328,7 @@ async def change_candle(data: dict):
     # logger.debug(data)
 
     if data["symbol"] in order_book:
+        return
         if order_book[data["symbol"]]["open_price"] != data["candles"][1]:
             # Новая свечка
 
@@ -324,8 +348,8 @@ async def change_candle(data: dict):
     else:
         order_book[data["symbol"]] = {
             "open_price": data["candles"][1],
-            "baseIncrement": 7,
-            "sizeIncrement": 1,
+            "baseIncrement": symbol_list[data["symbol"]]["baseIncrement"],
+            "sizeIncrement": symbol_list[data["symbol"]]["sizeIncrement"],
         }
         logger.debug(order_book)
 
@@ -407,8 +431,7 @@ async def change_order(data: dict):
 async def main() -> None:
     """Главная функция приложения."""
     logger.info("Start market to bulge")
-    await send_telegram_msg("Start market to bulge")
-    # /api/v1/orders?status=active&type=limit&symbol=BTC-USDT
+    # await send_telegram_msg("Start market to bulge")
 
     async def event(msg: dict) -> None:
         match msg:  # Add Stop Order Event
