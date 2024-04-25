@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 from uuid import uuid1
 
 import aiohttp
-from decouple import config
+from decouple import config, Csv
 from kucoin.client import Market, Trade, User, WsToken
 from kucoin.ws_client import KucoinWsClient
 from loguru import logger
@@ -17,7 +17,7 @@ key = config("KEY", cast=str)
 secret = config("SECRET", cast=str)
 passphrase = config("PASSPHRASE", cast=str)
 base_stable = config("BASE_STABLE", cast=str)
-currency = config("CURRENCY", cast=str)
+currency = config("CURRENCY", cast=Csv(str))
 time_shift = config("TIME_SHIFT", cast=str)
 base_stake = config("BASE_STAKE", cast=int)
 
@@ -102,55 +102,7 @@ async def send_telegram_msg(msg: str):
     ):
         logger.info(f"Sent teleg:{response.status}")
 
-
-def get_account_info():
-    """Get all assert in account."""
-
-    for asset in user.get_account_list():
-        logger.debug(asset)
-        if asset["type"] == "trade":  # Get assert only on trade account
-            if (
-                asset["currency"] != base_stable
-            ):  # Получаем все ордера в которых участвует этот актив, кроме USDT
-                symbol_order = order.get_order_list(
-                    **{
-                        "symbol": f'{asset["currency"]}-{base_stable}',
-                        # 'type':"limit_stop",
-                        # "status":"active",
-                    },
-                )
-
-                d = order.get_all_stop_order_details(
-                    **{
-                        "symbol": f'{asset["currency"]}-{base_stable}',
-                    },
-                )
-                logger.debug(d)
-                for order in symbol_order["items"]:
-
-                    # logger.debug(order)
-                    pass
-
-                    # book[asset["currency"]] = {
-                    # "available": asset["available"],
-                    # "orderId": order["id"],
-                    # }
-
-                    # priceIncrement = market.get_symbol_list_v2()
-
-                    # for ff in priceIncrement:
-                    # if ff['baseCurrency'] in book:
-                    # book[ff['baseCurrency']].update({"priceIncrement": ff['priceIncrement']})
-
-            else:
-                book[asset["currency"]] = {"available": asset["available"]}
-    logger.debug(book)
-
-
-# Нужно как-то выкачать priceIncrement
-
 d = {"sell": "loss", "buy": "entry"}
-
 
 def get_payload(side: str, symbol: str, price: int, priceIncrement: str):
     place = priceIncrement.split("1")[0].count("0")
@@ -325,10 +277,9 @@ async def change_account_balance(data: dict):
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
-    # logger.debug(data)
+    logger.debug(data)
 
     if data["symbol"] in order_book:
-        return
         if order_book[data["symbol"]]["open_price"] != data["candles"][1]:
             # Новая свечка
 
@@ -456,14 +407,14 @@ async def main() -> None:
             }:
                 await change_order(order)
 
-    # get_account_info()
-
     balance = await KucoinWsClient.create(None, client, event, private=True)
     order = await KucoinWsClient.create(None, client, event, private=True)
     candle = await KucoinWsClient.create(None, WsToken(), event, private=False)
 
+    tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
+
     await balance.subscribe("/account/balance")
-    await candle.subscribe(f"/market/candles:{currency}-{base_stable}_{time_shift}")
+    await candle.subscribe(f'/market/candles:{tokens}')
     await order.subscribe("/spotMarket/tradeOrdersV2")
 
     while True:
