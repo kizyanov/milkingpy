@@ -287,6 +287,7 @@ async def cancel_limit_stop_order(
 
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
+    logger.info(data)
     if data['currency'] =='USDT':
         holdChange = float(data['holdChange'])
         total = float(data['total'])
