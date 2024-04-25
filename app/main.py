@@ -277,7 +277,6 @@ async def change_account_balance(data: dict):
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
-    logger.debug(data)
 
     if data["symbol"] in order_book:
         if order_book[data["symbol"]]["open_price"] != data["candles"][1]:
