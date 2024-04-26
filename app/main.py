@@ -78,10 +78,11 @@ for symbol in market.get_symbol_list_v2():
 
 
 for tick in order_book:
-    candle = market.get_kline({"symbol": tick, "kline_type": time_shift})
+    candle = market.get_kline(symbol=tick, kline_type=time_shift)
     order_book[tick].update({"open_price": candle[0][1]})
 
 logger.info(order_book)
+
 
 async def send_telegram_msg(msg: str):
     """Отправка сообщения в телеграмм."""
