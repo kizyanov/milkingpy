@@ -63,29 +63,25 @@ headers_base = {
 }
 
 
-symbol_list = {}
-
 for symbol in market.get_symbol_list_v2():
     if "." in symbol["baseIncrement"] and "." in symbol["priceIncrement"]:
-        symbol_list.update(
-            {
-                symbol["symbol"]: {
-                    "baseIncrement": len(symbol["baseIncrement"].split(".")[1]),
-                    "sizeIncrement": len(symbol["priceIncrement"].split(".")[1]),
-                }
-            }
-        )
+        order_book[data["symbol"]] = {
+            "baseIncrement": len(symbol["baseIncrement"].split(".")[1]),
+            "sizeIncrement": len(symbol["priceIncrement"].split(".")[1]),
+        }
 
     else:
-        symbol_list.update(
-            {
-                symbol["symbol"]: {
-                    "baseIncrement": len(symbol["baseIncrement"]),
-                    "sizeIncrement": len(symbol["priceIncrement"]),
-                }
-            }
-        )
+        order_book[data["symbol"]] = {
+            "baseIncrement": len(symbol["baseIncrement"]),
+            "sizeIncrement": len(symbol["priceIncrement"]),
+        }
 
+
+for tick in order_book:
+    candle = market.get_kline({"symbol": tick, "type": time_shift})
+    order_book[tick].update({"open_price": candle[0][1]})
+
+logger.info(order_book)
 
 async def send_telegram_msg(msg: str):
     """Отправка сообщения в телеграмм."""
@@ -281,33 +277,26 @@ async def change_account_balance(data: dict):
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
 
-    if data["symbol"] in order_book:
-        if order_book[data["symbol"]]["open_price"] != data["candles"][1]:
-            # Новая свечка
+    if order_book[data["symbol"]]["open_price"] != data["candles"][1]:
+        # Новая свечка
 
-            baseIncrement = order_book[data["symbol"]]["baseIncrement"]
-            market_price = float(data["candles"][1])
-            size = f"{base_stake / market_price:.{baseIncrement}f}"
+        baseIncrement = order_book[data["symbol"]]["baseIncrement"]
+        market_price = float(data["candles"][1])
+        size = f"{base_stake / market_price:.{baseIncrement}f}"
 
-            task = asyncio.create_task(
-                make_limit_order(
-                    side="buy",
-                    price=str(market_price),
-                    symbol=data["symbol"],
-                    size=size,
-                )
+        task = asyncio.create_task(
+            make_limit_order(
+                side="buy",
+                price=str(market_price),
+                symbol=data["symbol"],
+                size=size,
             )
-            background_tasks.add(task)
+        )
+        background_tasks.add(task)
 
-            task.add_done_callback(background_tasks.discard)
+        task.add_done_callback(background_tasks.discard)
 
-            order_book[data["symbol"]]["open_price"] = data["candles"][1]
-    else:
-        order_book[data["symbol"]] = {
-            "open_price": data["candles"][1],
-            "baseIncrement": symbol_list[data["symbol"]]["baseIncrement"],
-            "sizeIncrement": symbol_list[data["symbol"]]["sizeIncrement"],
-        }
+        order_book[data["symbol"]]["open_price"] = data["candles"][1]
 
 
 async def change_order(data: dict):
