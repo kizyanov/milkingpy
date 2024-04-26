@@ -64,7 +64,6 @@ headers_base = {
 
 
 for symbol in market.get_symbol_list_v2():
-    logger.debug(symbol)
     if "." in symbol["baseIncrement"] and "." in symbol["priceIncrement"]:
         order_book[symbol["symbol"]] = {
             "baseIncrement": len(symbol["baseIncrement"].split(".")[1]),
@@ -79,7 +78,7 @@ for symbol in market.get_symbol_list_v2():
 
 
 for tick in order_book:
-    candle = market.get_kline({"symbol": tick, "type": time_shift})
+    candle = market.get_kline({"symbol": tick, "kline_type": time_shift})
     order_book[tick].update({"open_price": candle[0][1]})
 
 logger.info(order_book)
