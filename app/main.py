@@ -64,7 +64,7 @@ headers_base = {
 
 
 for symbol in market.get_symbol_list_v2():
-    if symbol["baseCurrency"] in currency:
+    if symbol["baseCurrency"] in currency and symbol["quoteCurrency"] == base_stable:
         if "." in symbol["baseIncrement"] and "." in symbol["priceIncrement"]:
             order_book[symbol["symbol"]] = {
                 "baseIncrement": len(symbol["baseIncrement"].split(".")[1]),
