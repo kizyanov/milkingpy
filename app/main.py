@@ -218,6 +218,7 @@ async def make_limit_order(
         "KC-API-PASSPHRASE": encrypted_msg(passphrase),
     }
     headers.update(**headers_base)
+    logger.info(headers)
 
     async with (
         aiohttp.ClientSession() as session,
