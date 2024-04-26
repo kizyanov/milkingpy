@@ -65,13 +65,13 @@ headers_base = {
 
 for symbol in market.get_symbol_list_v2():
     if "." in symbol["baseIncrement"] and "." in symbol["priceIncrement"]:
-        order_book[data["symbol"]] = {
+        order_book[symbol["symbol"]] = {
             "baseIncrement": len(symbol["baseIncrement"].split(".")[1]),
             "sizeIncrement": len(symbol["priceIncrement"].split(".")[1]),
         }
 
     else:
-        order_book[data["symbol"]] = {
+        order_book[symbol["symbol"]] = {
             "baseIncrement": len(symbol["baseIncrement"]),
             "sizeIncrement": len(symbol["priceIncrement"]),
         }
