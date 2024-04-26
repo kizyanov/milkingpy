@@ -65,6 +65,7 @@ headers_base = {
 
 for symbol in market.get_symbol_list_v2():
     if symbol["baseCurrency"] in currency and symbol["quoteCurrency"] == base_stable:
+        logger.info(symbol)
         if "." in symbol["baseIncrement"] and "." in symbol["priceIncrement"]:
             order_book[symbol["symbol"]] = {
                 "baseIncrement": len(symbol["baseIncrement"].split(".")[1]),
@@ -408,9 +409,9 @@ async def main() -> None:
 
     tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
-    await balance.subscribe("/account/balance")
-    await candle.subscribe(f"/market/candles:{tokens}")
-    await order.subscribe("/spotMarket/tradeOrdersV2")
+    # await balance.subscribe("/account/balance")
+    # await candle.subscribe(f"/market/candles:{tokens}")
+    # await order.subscribe("/spotMarket/tradeOrdersV2")
 
     while True:
         await asyncio.sleep(60)
