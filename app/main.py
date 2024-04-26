@@ -86,6 +86,7 @@ for symbol in market.get_symbol_list_v2():
             }
         )
 
+
 async def send_telegram_msg(msg: str):
     """Отправка сообщения в телеграмм."""
     async with (
@@ -102,7 +103,9 @@ async def send_telegram_msg(msg: str):
     ):
         logger.info(f"Sent teleg:{response.status}")
 
+
 d = {"sell": "loss", "buy": "entry"}
+
 
 def get_payload(side: str, symbol: str, price: int, priceIncrement: str):
     place = priceIncrement.split("1")[0].count("0")
@@ -234,7 +237,6 @@ async def cancel_limit_stop_order(
     method: str = "DELETE",
     method_uri: str = "/api/v1/stop-order/",
 ):
-
     if orderId == "1":
         return
 
@@ -287,12 +289,18 @@ async def change_candle(data: dict):
             size = f"{base_stake / market_price:.{baseIncrement}f}"
             logger.info(f"{size=}")
 
-            await make_limit_order(
-                side="buy",
-                price=str(market_price),
-                symbol="BTC-USDT",
-                size=size,
+            task = asyncio.create_task(
+                make_limit_order(
+                    side="buy",
+                    price=str(market_price),
+                    symbol=data["symbol"],
+                    size=size,
+                )
             )
+            background_tasks.add(task)
+
+            task.add_done_callback(background_tasks.discard)
+
             order_book[data["symbol"]]["open_price"] = data["candles"][1]
             logger.debug(order_book)
     else:
@@ -413,7 +421,7 @@ async def main() -> None:
     tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
     await balance.subscribe("/account/balance")
-    await candle.subscribe(f'/market/candles:{tokens}')
+    await candle.subscribe(f"/market/candles:{tokens}")
     await order.subscribe("/spotMarket/tradeOrdersV2")
 
     while True:
