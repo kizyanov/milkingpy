@@ -228,6 +228,7 @@ async def make_limit_order(
         ) as response,
     ):
         result = await response.json()
+        logger.warning(result)
         if result["code"] == "200000":
             return result["data"]["orderId"]
 
@@ -264,7 +265,6 @@ async def cancel_limit_stop_order(
 
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
-    logger.info(data)
     if data["currency"] == "USDT":
         holdChange = float(data["holdChange"])
         total = float(data["total"])
@@ -287,7 +287,6 @@ async def change_candle(data: dict):
             baseIncrement = order_book[data["symbol"]]["baseIncrement"]
             market_price = float(data["candles"][1])
             size = f"{base_stake / market_price:.{baseIncrement}f}"
-            logger.info(f"{size=}")
 
             task = asyncio.create_task(
                 make_limit_order(
@@ -302,14 +301,12 @@ async def change_candle(data: dict):
             task.add_done_callback(background_tasks.discard)
 
             order_book[data["symbol"]]["open_price"] = data["candles"][1]
-            logger.debug(order_book)
     else:
         order_book[data["symbol"]] = {
             "open_price": data["candles"][1],
             "baseIncrement": symbol_list[data["symbol"]]["baseIncrement"],
             "sizeIncrement": symbol_list[data["symbol"]]["sizeIncrement"],
         }
-        logger.debug(order_book)
 
 
 async def change_order(data: dict):
