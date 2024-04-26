@@ -208,6 +208,8 @@ async def make_limit_order(
         size=size,
     )
 
+    logger.info(data_json)
+
     uri_path = method_uri + data_json
     str_to_sign = str(now_time) + method + uri_path
 
@@ -409,9 +411,9 @@ async def main() -> None:
 
     tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
-    # await balance.subscribe("/account/balance")
-    # await candle.subscribe(f"/market/candles:{tokens}")
-    # await order.subscribe("/spotMarket/tradeOrdersV2")
+    await balance.subscribe("/account/balance")
+    await candle.subscribe(f"/market/candles:{tokens}")
+    await order.subscribe("/spotMarket/tradeOrdersV2")
 
     while True:
         await asyncio.sleep(60)
