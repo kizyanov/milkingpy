@@ -1,4 +1,3 @@
-
 async def make_stop_limit_order(
     side: str,
     price: int,
@@ -37,8 +36,6 @@ async def make_stop_limit_order(
         result = await response.json()
         if result["code"] == "200000":
             return result["data"]["orderId"]
-
-
 
 
 def get_payload(side: str, symbol: str, price: int, priceIncrement: str):
