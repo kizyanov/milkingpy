@@ -100,7 +100,7 @@ async def send_telegram_msg(msg: str):
             },
         ) as response,
     ):
-        logger.info(f"Sent teleg:{response.status}")
+        f = response.status
 
 
 d = {"sell": "loss", "buy": "entry"}
@@ -208,8 +208,6 @@ async def make_limit_order(
         size=size,
     )
 
-    logger.info(data_json)
-
     uri_path = method_uri + data_json
     str_to_sign = str(now_time) + method + uri_path
 
@@ -219,7 +217,6 @@ async def make_limit_order(
         "KC-API-PASSPHRASE": encrypted_msg(passphrase),
     }
     headers.update(**headers_base)
-    logger.info(headers)
 
     async with (
         aiohttp.ClientSession() as session,
@@ -230,7 +227,6 @@ async def make_limit_order(
         ) as response,
     ):
         result = await response.json()
-        logger.warning(result)
         if result["code"] == "200000":
             return result["data"]["orderId"]
 
@@ -268,6 +264,7 @@ async def cancel_limit_stop_order(
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
     if data["currency"] == "USDT":
+        logger.info(data)
         holdChange = float(data["holdChange"])
         total = float(data["total"])
         task = asyncio.create_task(
