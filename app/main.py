@@ -25,6 +25,8 @@ base_uri = "https://api.kucoin.com"
 
 order_book = {}
 
+account_available = {"available": "0"}
+
 background_tasks = set()
 
 user = User(
@@ -263,9 +265,11 @@ async def cancel_limit_stop_order(
 
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
-    if data["currency"] == "USDT" and data["relationEvent"] == "trade.other":
-        logger.info(data)
-        holdChange = float(data["holdChange"])
+    if (
+        data["currency"] == "USDT"
+        and data["relationEvent"] == "trade.other"
+        and account_available["available"] != data["total"]
+    ):
         total = float(data["total"])
         task = asyncio.create_task(
             send_telegram_msg(f"Change account balance: {total:.2f} USDT")
@@ -274,6 +278,7 @@ async def change_account_balance(data: dict):
         background_tasks.add(task)
 
         task.add_done_callback(background_tasks.discard)
+        account_available["available"] = data["total"]
 
 
 async def change_candle(data: dict):
