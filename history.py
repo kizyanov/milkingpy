@@ -112,3 +112,33 @@ async def make_stop_limit_order(
         result = await response.json()
         if result["code"] == "200000":
             return result["data"]["orderId"]
+
+
+async def cancel_limit_stop_order(
+    orderId: str,
+    method: str = "DELETE",
+    method_uri: str = "/api/v1/stop-order/",
+):
+    if orderId == "1":
+        return
+
+    now_time = int(time.time()) * 1000
+
+    uri_path = method_uri + orderId
+    str_to_sign = str(now_time) + method + uri_path
+
+    headers = {
+        "KC-API-SIGN": encrypted_msg(str_to_sign),
+        "KC-API-TIMESTAMP": str(now_time),
+        "KC-API-PASSPHRASE": encrypted_msg(passphrase),
+    }
+    headers.update(**headers_base)
+
+    async with (
+        aiohttp.ClientSession() as session,
+        session.delete(
+            urljoin(base_uri, uri_path),
+            headers=headers,
+        ) as response,
+    ):
+        result = await response.json()
