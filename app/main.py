@@ -422,3 +422,10 @@ async def main() -> None:
 
 
 asyncio.run(main())
+
+
+# 200
+# 21.521
+# 20.8
+# init
+# 242.321
