@@ -140,7 +140,7 @@ async def make_limit_order(
     symbol: str,
     size: str,
     timeInForce: str = "GTC",
-    cancelAfter: int = 60 * 60 * 24,
+    cancelAfter: int = 0,
     method: str = "POST",
     method_uri: str = "/api/v1/orders",
 ):
@@ -212,6 +212,7 @@ async def change_candle(data: dict):
                 symbol=data["symbol"],
                 size=size,
                 timeInForce="GTT",
+                cancelAfter=int(time.now() + 60 * 60 * 24),
             )
         )
         background_tasks.add(task)
