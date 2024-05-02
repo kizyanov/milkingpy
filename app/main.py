@@ -215,7 +215,7 @@ async def change_candle(data: dict):
                 symbol=data["symbol"],
                 size=size,
                 timeInForce="GTT",
-                cancelAfter=int(time.time() + 60 * 60 * 24),
+                cancelAfter=60 * 60 * 24,
             )
         )
         background_tasks.add(task)
@@ -281,7 +281,7 @@ async def change_order(data: dict):
                     symbol=data["symbol"],
                     size=size,
                     timeInForce="GTT",
-                    cancelAfter=int(time.time() + 60 * 60 * 24),
+                    cancelAfter=60 * 60 * 24,
                 )
             )
 
