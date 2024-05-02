@@ -167,6 +167,8 @@ async def make_limit_order(
     }
     headers.update(**headers_base)
 
+    logger.debug(headers)
+
     async with (
         aiohttp.ClientSession() as session,
         session.post(
@@ -174,8 +176,9 @@ async def make_limit_order(
             headers=headers,
             data=data_json,
         ),
-    ):
-        pass
+    ) as response:
+        result = await response.json()
+        logger.debug(result)
 
 
 async def change_account_balance(data: dict):
