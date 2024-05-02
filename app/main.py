@@ -267,15 +267,16 @@ async def change_order(data: dict):
         elif data["side"] == "sell":
             # Поставить лимитку на покупку внизу, когда продали актив
             logger.success(f"Success sell:{data['symbol']}")
-            minus_one_percent = float(data["price"]) * 0.99
-            sizeIncrement = order_book[data["symbol"]]["sizeIncrement"]
 
+            baseIncrement = order_book[data["symbol"]]["baseIncrement"]
+            size = f"{base_stake / float(order_book[data["symbol"]]["open_price"]):.{baseIncrement}f}"
+            
             task = asyncio.create_task(
                 make_limit_order(
                     side="buy",
-                    price=f"{minus_one_percent:.{sizeIncrement}f}",
+                    price=order_book[data["symbol"]]["open_price"],
                     symbol=data["symbol"],
-                    size=data["size"],
+                    size=size,
                     timeInForce="GTT",
                 )
             )
