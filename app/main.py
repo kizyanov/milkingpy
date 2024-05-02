@@ -269,8 +269,8 @@ async def change_order(data: dict):
             logger.success(f"Success sell:{data['symbol']}")
 
             baseIncrement = order_book[data["symbol"]]["baseIncrement"]
-            size = f"{base_stake / float(order_book[data["symbol"]]["open_price"]):.{baseIncrement}f}"
-            
+            size = f'{base_stake / float(order_book[data["symbol"]]["open_price"]):.{baseIncrement}f}'
+
             task = asyncio.create_task(
                 make_limit_order(
                     side="buy",
@@ -278,6 +278,7 @@ async def change_order(data: dict):
                     symbol=data["symbol"],
                     size=size,
                     timeInForce="GTT",
+                    cancelAfter=int(time.time() + 60 * 60 * 24),
                 )
             )
 
