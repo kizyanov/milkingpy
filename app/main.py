@@ -175,8 +175,8 @@ async def make_limit_order(
             urljoin(base_uri, method_uri),
             headers=headers,
             data=data_json,
-        ),
-    ) as response:
+        ) as response,
+    ):
         result = await response.json()
         logger.debug(result)
 
