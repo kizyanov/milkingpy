@@ -212,7 +212,7 @@ async def change_candle(data: dict):
                 symbol=data["symbol"],
                 size=size,
                 timeInForce="GTT",
-                cancelAfter=int(time.now() + 60 * 60 * 24),
+                cancelAfter=int(time.time() + 60 * 60 * 24),
             )
         )
         background_tasks.add(task)
