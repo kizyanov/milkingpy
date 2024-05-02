@@ -110,6 +110,8 @@ def get_payload(
     symbol: str,
     price: int,
     size: str,
+    timeInForce: str,
+    cancelAfter: int,
 ):
     return json.dumps(
         {
@@ -119,6 +121,8 @@ def get_payload(
             "price": str(price),
             "symbol": symbol,
             "size": size,
+            "timeInForce": timeInForce,
+            "cancelAfter": cancelAfter,
         },
     )
 
@@ -135,6 +139,8 @@ async def make_limit_order(
     price: int,
     symbol: str,
     size: str,
+    timeInForce: str = "GTC",
+    cancelAfter: int = 60 * 60 * 24,
     method: str = "POST",
     method_uri: str = "/api/v1/orders",
 ):
@@ -147,6 +153,8 @@ async def make_limit_order(
         symbol=symbol,
         price=price,
         size=size,
+        timeInForce=timeInForce,
+        cancelAfter=cancelAfter,
     )
 
     uri_path = method_uri + data_json
@@ -203,6 +211,7 @@ async def change_candle(data: dict):
                 price=data["candles"][1],
                 symbol=data["symbol"],
                 size=size,
+                timeInForce="GTT",
             )
         )
         background_tasks.add(task)
@@ -236,6 +245,7 @@ async def change_order(data: dict):
 
     if data["status"] == "done" and data["type"] == "filled":
         if data["side"] == "buy":
+            # Поставить лимитку на продажу вверху, когда купили актив
             logger.success(f"Success buy:{data['symbol']}")
             plus_one_percent = float(data["price"]) * 1.01
             sizeIncrement = order_book[data["symbol"]]["sizeIncrement"]
@@ -254,7 +264,24 @@ async def change_order(data: dict):
             task.add_done_callback(background_tasks.discard)
 
         elif data["side"] == "sell":
+            # Поставить лимитку на покупку внизу, когда продали актив
             logger.success(f"Success sell:{data['symbol']}")
+            minus_one_percent = float(data["price"]) * 0.99
+            sizeIncrement = order_book[data["symbol"]]["sizeIncrement"]
+
+            task = asyncio.create_task(
+                make_limit_order(
+                    side="buy",
+                    price=f"{minus_one_percent:.{sizeIncrement}f}",
+                    symbol=data["symbol"],
+                    size=data["size"],
+                    timeInForce="GTT",
+                )
+            )
+
+            background_tasks.add(task)
+
+            task.add_done_callback(background_tasks.discard)
 
     match data["status"]:
         case "new":
