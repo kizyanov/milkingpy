@@ -91,7 +91,7 @@ for tick in order_book:
 logger.info(order_book)
 
 
-async def send_telegram_msg(msg: str):
+async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
     while True:
         msg = await queue.get()
