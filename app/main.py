@@ -164,6 +164,8 @@ async def make_limit_order(
         cancelAfter=cancelAfter,
     )
 
+    logger.debug(data_json)
+
     uri_path = method_uri + data_json
     str_to_sign = str(now_time) + method + uri_path
 
@@ -180,9 +182,10 @@ async def make_limit_order(
             urljoin(base_uri, method_uri),
             headers=headers,
             data=data_json,
-        ),
+        ) as response,
     ):
-        pass
+        res = await response.join()
+        logger.debug(res)
 
 
 async def change_account_balance(data: dict):
@@ -328,7 +331,7 @@ async def main() -> None:
                 "data": dict() as candle,
                 "type": "message",
                 "subject": "trade.candles.update",
-            }:  
+            }:
                 await change_candle(candle)
 
             case {
