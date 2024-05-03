@@ -270,6 +270,7 @@ async def change_order(data: dict):
         elif data["side"] == "sell":
             # Поставить лимитку на покупку внизу, когда продали актив
             logger.success(f"Success sell:{data['symbol']}")
+            return
 
             baseIncrement = order_book[data["symbol"]]["baseIncrement"]
             size = f'{base_stake / float(order_book[data["symbol"]]["open_price"]):.{baseIncrement}f}'
