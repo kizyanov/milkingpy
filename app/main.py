@@ -329,7 +329,6 @@ async def main() -> None:
                 "type": "message",
                 "subject": "trade.candles.update",
             }:  
-                logger.info("trade.candles.update")
                 await change_candle(candle)
 
             case {
@@ -337,7 +336,6 @@ async def main() -> None:
                 "type": "message",
                 "subject": "account.balance",
             }:
-                logger.info("account.balance")
                 await change_account_balance(balance)
 
             case {
@@ -345,7 +343,6 @@ async def main() -> None:
                 "type": "message",
                 "topic": "/spotMarket/tradeOrdersV2",
             }:
-                logger.info("/spotMarket/tradeOrdersV2")
                 await change_order(order)
 
     ws_private = await KucoinWsClient.create(None, client, event, private=True)
