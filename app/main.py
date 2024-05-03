@@ -64,6 +64,9 @@ headers_base = {
     "User-Agent": "kucoin-python-sdk/2",
 }
 
+telegram_url = f"https://api.telegram.org/bot{config('TELEGRAM_BOT_API_KEY', cast=str)}/sendMessage"
+
+queue = asyncio.Queue()
 
 for symbol in market.get_symbol_list_v2():
     if symbol["baseCurrency"] in currency and symbol["quoteCurrency"] == base_stable:
@@ -90,19 +93,22 @@ logger.info(order_book)
 
 async def send_telegram_msg(msg: str):
     """Отправка сообщения в телеграмм."""
-    async with (
-        aiohttp.ClientSession() as session,
-        session.post(
-            f"https://api.telegram.org/bot{config('TELEGRAM_BOT_API_KEY', cast=str)}/sendMessage",
-            json={
-                "chat_id": config("TELEGRAM_BOT_CHAT_ID", cast=str),
-                "parse_mode": "HTML",
-                "disable_notification": True,
-                "text": msg,
-            },
-        ),
-    ):
-        pass
+    while True:
+        msg = await queue.get()
+        async with (
+            aiohttp.ClientSession() as session,
+            session.post(
+                telegram_url,
+                json={
+                    "chat_id": config("TELEGRAM_BOT_CHAT_ID", cast=str),
+                    "parse_mode": "HTML",
+                    "disable_notification": True,
+                    "text": msg,
+                },
+            ),
+        ):
+            pass
+        await asyncio.sleep(1)
 
 
 def get_payload(
@@ -186,13 +192,7 @@ async def change_account_balance(data: dict):
         and account_available["available"] != data["total"]
     ):
         total = float(data["total"])
-        task = asyncio.create_task(
-            send_telegram_msg(f"Change account balance: {total:.2f} USDT")
-        )
-
-        background_tasks.add(task)
-
-        task.add_done_callback(background_tasks.discard)
+        await queue.put(f"Change account balance: {total:.2f} USDT")
         account_available["available"] = data["total"]
 
 
@@ -320,7 +320,7 @@ async def change_order(data: dict):
 async def main() -> None:
     """Главная функция приложения."""
     logger.info("Start market to bulge")
-    # await send_telegram_msg("Start market to bulge")
+    await queue.put("Start market to bulge")
 
     async def event(msg: dict) -> None:
         match msg:  # Add Stop Order Event
@@ -355,8 +355,7 @@ async def main() -> None:
     await candle.subscribe(f"/market/candles:{tokens}")
     await order.subscribe("/spotMarket/tradeOrdersV2")
 
-    while True:
-        await asyncio.sleep(60)
+    await send_telegram_msg()
 
 
 asyncio.run(main())
