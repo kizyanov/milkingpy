@@ -321,7 +321,6 @@ async def change_order(data: dict):
 async def main() -> None:
     """Главная функция приложения."""
     logger.info("Start market to bulge")
-    await queue.put("Start market to bulge")
 
     async def event(msg: dict) -> None:
         match msg:  # Add Stop Order Event
