@@ -109,6 +109,7 @@ async def send_telegram_msg():
         ):
             pass
         await asyncio.sleep(1)
+        queue.task_done()
 
 
 def get_payload(
