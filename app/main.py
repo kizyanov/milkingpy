@@ -345,15 +345,13 @@ async def main() -> None:
             }:
                 await change_order(order)
 
-    balance = await KucoinWsClient.create(None, client, event, private=True)
-    order = await KucoinWsClient.create(None, client, event, private=True)
-    candle = await KucoinWsClient.create(None, WsToken(), event, private=False)
+    test = await KucoinWsClient.create(None, client, event, private=True)
 
     tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
-    await balance.subscribe("/account/balance")
-    await candle.subscribe(f"/market/candles:{tokens}")
-    await order.subscribe("/spotMarket/tradeOrdersV2")
+    await test.subscribe("/account/balance")
+    await test.subscribe(f"/market/candles:{tokens}")
+    await test.subscribe("/spotMarket/tradeOrdersV2")
 
     await send_telegram_msg()
 
