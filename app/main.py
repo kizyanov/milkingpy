@@ -328,7 +328,8 @@ async def main() -> None:
                 "data": dict() as candle,
                 "type": "message",
                 "subject": "trade.candles.update",
-            }:
+            }:  
+                logger.info("trade.candles.update")
                 await change_candle(candle)
 
             case {
@@ -336,6 +337,7 @@ async def main() -> None:
                 "type": "message",
                 "subject": "account.balance",
             }:
+                logger.info("account.balance")
                 await change_account_balance(balance)
 
             case {
@@ -343,15 +345,16 @@ async def main() -> None:
                 "type": "message",
                 "topic": "/spotMarket/tradeOrdersV2",
             }:
+                logger.info("/spotMarket/tradeOrdersV2")
                 await change_order(order)
 
-    test = await KucoinWsClient.create(None, client, event, private=True)
+    ws = await KucoinWsClient.create(None, client, event, private=True)
 
     tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
-    await test.subscribe("/account/balance")
-    await test.subscribe(f"/market/candles:{tokens}")
-    await test.subscribe("/spotMarket/tradeOrdersV2")
+    await ws.subscribe("/account/balance")
+    await ws.subscribe(f"/market/candles:{tokens}")
+    await ws.subscribe("/spotMarket/tradeOrdersV2")
 
     await send_telegram_msg()
 
