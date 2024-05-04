@@ -274,10 +274,10 @@ async def change_order(data: dict):
             logger.success(f"Success sell:{data['symbol']}")
             return
 
-            # уменьшить актив на 1 процент
-            minus_one_percent = Decimal(
+            # получить количество токенов за base_stake USDT
+            tokens_count = base_stake / Decimal(
                 order_book[data["symbol"]]["open_price"]
-            ) * Decimal(".99")
+            )
 
             task = asyncio.create_task(
                 make_limit_order(
@@ -285,11 +285,11 @@ async def change_order(data: dict):
                     price=order_book[data["symbol"]]["open_price"],
                     symbol=data["symbol"],
                     size=str(
-                        minus_one_percent.quantize(
-                            order_book[data["symbol"]]["priceIncrement"],
+                        tokens_count.quantize(
+                            order_book[data["symbol"]]["baseIncrement"],
                             ROUND_DOWN,
                         )
-                    ),  # округление,
+                    ),  # округление
                     timeInForce="GTT",
                     cancelAfter=60 * 60 * 24,
                 )
