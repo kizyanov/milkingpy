@@ -6,7 +6,7 @@ import json
 import time
 from urllib.parse import urljoin
 from uuid import uuid1
-
+from decimal import Decimal, ROUND_DOWN
 import aiohttp
 from decouple import config, Csv
 from kucoin.client import Market, Trade, User, WsToken
@@ -19,7 +19,7 @@ passphrase = config("PASSPHRASE", cast=str)
 base_stable = config("BASE_STABLE", cast=str)
 currency = config("CURRENCY", cast=Csv(str))
 time_shift = config("TIME_SHIFT", cast=str)
-base_stake = config("BASE_STAKE", cast=int)
+base_stake = Decimal(config("BASE_STAKE", cast=int))
 
 base_uri = "https://api.kucoin.com"
 
@@ -70,19 +70,10 @@ queue = asyncio.Queue()
 
 for symbol in market.get_symbol_list_v2():
     if symbol["baseCurrency"] in currency and symbol["quoteCurrency"] == base_stable:
-        logger.info(symbol)
-        if "." in symbol["baseIncrement"] and "." in symbol["priceIncrement"]:
-            order_book[symbol["symbol"]] = {
-                "baseIncrement": len(symbol["baseIncrement"].split(".")[1]),
-                "sizeIncrement": len(symbol["priceIncrement"].split(".")[1]),
-            }
-
-        else:
-            order_book[symbol["symbol"]] = {
-                "baseIncrement": len(symbol["baseIncrement"]),
-                "sizeIncrement": len(symbol["priceIncrement"]),
-            }
-
+        order_book[symbol["symbol"]] = {
+            "baseIncrement": Decimal(symbol["baseIncrement"]),
+            "priceIncrement": Decimal(symbol["priceIncrement"]),
+        }
 
 for tick in order_book:
     candle = market.get_kline(symbol=tick, kline_type=time_shift)
@@ -135,7 +126,7 @@ def get_payload(
 
 
 def encrypted_msg(msg: str) -> str:
-    """."""
+    """Шифрование сообщения для биржи."""
     return base64.b64encode(
         hmac.new(secret.encode("utf-8"), msg.encode("utf-8"), hashlib.sha256).digest(),
     ).decode()
@@ -205,16 +196,20 @@ async def change_candle(data: dict):
 
     if order_book[data["symbol"]]["open_price"] != data["candles"][1]:
         # Новая свечка
-
-        baseIncrement = order_book[data["symbol"]]["baseIncrement"]
-        size = f"{base_stake / float(data['candles'][1]):.{baseIncrement}f}"
+        # получить количество токенов за base_stake USDT
+        tokens_count = base_stake / Decimal(data["candles"][1])
 
         task = asyncio.create_task(
             make_limit_order(
                 side="buy",
                 price=data["candles"][1],
                 symbol=data["symbol"],
-                size=size,
+                size=str(
+                    tokens_count.quantize(
+                        order_book[data["symbol"]]["baseIncrement"],
+                        ROUND_DOWN,
+                    )
+                ),  # округление
                 timeInForce="GTT",
                 cancelAfter=60 * 60 * 24,
             )
@@ -252,13 +247,19 @@ async def change_order(data: dict):
         if data["side"] == "buy":
             # Поставить лимитку на продажу вверху, когда купили актив
             logger.success(f"Success buy:{data['symbol']}")
-            plus_one_percent = float(data["price"]) * 1.01
-            sizeIncrement = order_book[data["symbol"]]["sizeIncrement"]
+
+            # увеличить актив на 1 процент
+            plus_one_percent = Decimal(data["price"]) * Decimal("1.01")
 
             task = asyncio.create_task(
                 make_limit_order(
                     side="sell",
-                    price=f"{plus_one_percent:.{sizeIncrement}f}",
+                    price=str(
+                        plus_one_percent.quantize(
+                            order_book[data["symbol"]]["priceIncrement"],
+                            ROUND_DOWN,
+                        )
+                    ),  # округлить цену,
                     symbol=data["symbol"],
                     size=data["size"],
                 )
@@ -273,15 +274,22 @@ async def change_order(data: dict):
             logger.success(f"Success sell:{data['symbol']}")
             return
 
-            baseIncrement = order_book[data["symbol"]]["baseIncrement"]
-            size = f'{base_stake / float(order_book[data["symbol"]]["open_price"]):.{baseIncrement}f}'
+            # получить количество токенов за base_stake USDT
+            tokens_count = base_stake / Decimal(
+                order_book[data["symbol"]]["open_price"]
+            )
 
             task = asyncio.create_task(
                 make_limit_order(
                     side="buy",
                     price=order_book[data["symbol"]]["open_price"],
                     symbol=data["symbol"],
-                    size=size,
+                    size=str(
+                        tokens_count.quantize(
+                            order_book[data["symbol"]]["baseIncrement"],
+                            ROUND_DOWN,
+                        )
+                    ),  # округление,
                     timeInForce="GTT",
                     cancelAfter=60 * 60 * 24,
                 )
@@ -371,5 +379,3 @@ asyncio.run(main())
 # 252.55
 ########
 # 494.871
-
-
