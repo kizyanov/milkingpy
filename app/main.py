@@ -181,7 +181,6 @@ async def make_limit_order(
 
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
-    return
     if (
         data["currency"] == "USDT"
         and data["relationEvent"] == "trade.other"
