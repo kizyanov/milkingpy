@@ -211,7 +211,7 @@ async def change_candle(data: dict):
                     )
                 ),  # округление
                 timeInForce="GTT",
-                cancelAfter=60 * 60 * 24,
+                cancelAfter=86400,  # ровно сутки
             )
         )
         background_tasks.add(task)
@@ -291,7 +291,7 @@ async def change_order(data: dict):
                         )
                     ),  # округление
                     timeInForce="GTT",
-                    cancelAfter=60 * 60 * 24,
+                    cancelAfter=86400,  # ровно сутки
                 )
             )
 
