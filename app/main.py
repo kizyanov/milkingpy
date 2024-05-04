@@ -79,7 +79,7 @@ for tick in order_book:
     candle = market.get_kline(symbol=tick, kline_type=time_shift)
     order_book[tick].update({"open_price": candle[0][1]})
 
-logger.info(order_book)
+logger.info(order_book.keys())
 
 
 async def send_telegram_msg():
@@ -181,6 +181,7 @@ async def make_limit_order(
 
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
+    return
     if (
         data["currency"] == "USDT"
         and data["relationEvent"] == "trade.other"
