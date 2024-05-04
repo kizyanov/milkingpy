@@ -175,7 +175,7 @@ async def make_limit_order(
             data=data_json,
         ) as response,
     ):
-        res = await response.join()
+        res = await response.json()
         logger.debug(res)
 
 
