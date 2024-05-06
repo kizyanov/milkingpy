@@ -86,19 +86,20 @@ async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
     while True:
         msg = await queue.get()
-        async with (
-            aiohttp.ClientSession() as session,
-            session.post(
-                telegram_url,
-                json={
-                    "chat_id": config("TELEGRAM_BOT_CHAT_ID", cast=str),
-                    "parse_mode": "HTML",
-                    "disable_notification": True,
-                    "text": msg,
-                },
-            ),
-        ):
-            pass
+        for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
+                    telegram_url,
+                    json={
+                        "chat_id": chat_id,
+                        "parse_mode": "HTML",
+                        "disable_notification": True,
+                        "text": msg,
+                    },
+                ),
+            ):
+                pass
         await asyncio.sleep(1)
         queue.task_done()
 
