@@ -187,8 +187,12 @@ async def change_account_balance(data: dict):
         and data["relationEvent"] == "trade.other"
         and account_available["available"] != data["total"]
     ):
+        if float(account_available["available"]) < float(data["total"]):
+            emoj = '↗️'
+        else:
+            emoj = '↘️'
         total = float(data["total"])
-        await queue.put(f"Change account balance: {total:.2f} USDT")
+        await queue.put(f"Change account balance: {total:.2f} USDT {emoj}")
         account_available["available"] = data["total"]
 
 
