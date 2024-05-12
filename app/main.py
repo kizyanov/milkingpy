@@ -367,8 +367,8 @@ async def main() -> None:
     tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
     await ws_private.subscribe("/account/balance")
-    await ws_public.subscribe(f"/market/candles:{tokens}")
-    await ws_private.subscribe("/spotMarket/tradeOrdersV2")
+    # await ws_public.subscribe(f"/market/candles:{tokens}")
+    # await ws_private.subscribe("/spotMarket/tradeOrdersV2")
 
     await send_telegram_msg()
 
