@@ -79,12 +79,15 @@ for tick in order_book:
     candle = market.get_kline(symbol=tick, kline_type=time_shift)
     order_book[tick].update({"open_price": candle[0][1]})
 
+
 logger.info(order_book.keys())
 
-for symbol in user.get_account_list(account_type='margin'):
-    logger.debug(symbol)
-    if symbol['currency'] in order_book:
-        logger.debug(symbol)
+for short_symbol in user.get_account_list(account_type='margin'):
+    symbol = f"{symbol['currency']}-USDT"
+    if symbol in order_book:
+        order_book[symbol]['available'] = Decimal(short_symbol['available'])
+
+logger.info(order_book)
 
 async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
