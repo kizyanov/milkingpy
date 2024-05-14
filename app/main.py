@@ -81,6 +81,9 @@ for tick in order_book:
 
 logger.info(order_book.keys())
 
+for symbol in user.get_account_list(account_type='margin'):
+    if symbol['currency'] in order_book:
+        logger.debug(symbol)
 
 async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
@@ -212,8 +215,10 @@ async def change_candle(data: dict):
             result = 'buy'
         else:
             result = 'sell'
+
+        logger.debug(f"Change price:{result=} {open_price=} {close_price=}")
             
-        await queue.put(f'{data["symbol"]} need {result}')
+        # await queue.put(f'{data["symbol"]} need {result}')
 
         # task = asyncio.create_task(
         #     make_limit_order(
@@ -372,13 +377,13 @@ async def main() -> None:
             }:
                 await change_order(order)
 
-    ws_private = await KucoinWsClient.create(None, client, event, private=True)
-    ws_public = await KucoinWsClient.create(None, WsToken(), event, private=False)
+    # ws_private = await KucoinWsClient.create(None, client, event, private=True)
+    # ws_public = await KucoinWsClient.create(None, WsToken(), event, private=False)
 
-    tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
+    # tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
-    await ws_private.subscribe("/account/balance")
-    await ws_public.subscribe(f"/market/candles:{tokens}")
+    # await ws_private.subscribe("/account/balance")
+    # await ws_public.subscribe(f"/market/candles:{tokens}")
     # await ws_private.subscribe("/spotMarket/tradeOrdersV2")
 
     await send_telegram_msg()
