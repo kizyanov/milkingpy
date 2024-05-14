@@ -79,7 +79,7 @@ for symbol in market.get_symbol_list_v2():
             "baseIncrement": Decimal(symbol["baseIncrement"]),
             "priceIncrement": Decimal(symbol["priceIncrement"]),
             "open_price": Decimal(candle[0][1]),
-            "available": Decimal(short_symbol["available"]),
+            "available": Decimal(aval["available"]),
         }
 
 logger.info(order_book)
