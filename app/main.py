@@ -82,6 +82,7 @@ for tick in order_book:
 logger.info(order_book.keys())
 
 for symbol in user.get_account_list(account_type='margin'):
+    logger.debug(symbol)
     if symbol['currency'] in order_book:
         logger.debug(symbol)
 
