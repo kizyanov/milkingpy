@@ -73,19 +73,21 @@ for symbol in market.get_symbol_list_v2():
         order_book[symbol["symbol"]] = {
             "baseIncrement": Decimal(symbol["baseIncrement"]),
             "priceIncrement": Decimal(symbol["priceIncrement"]),
+            "available": Decimal("0"),
         }
-        
+
 
 for tick in order_book:
     candle = market.get_kline(symbol=tick, kline_type=time_shift)
     order_book[tick].update({"open_price": Decimal(candle[0][1])})
 
-for short_symbol in user.get_account_list(account_type='margin'):
+for short_symbol in user.get_account_list(account_type="margin"):
     symbol = f"{short_symbol['currency']}-USDT"
     if symbol in order_book:
-        order_book[symbol]['available'] = Decimal(short_symbol['available'])
+        order_book[symbol]["available"] = Decimal(short_symbol["available"])
 
 logger.info(order_book)
+
 
 async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
@@ -194,9 +196,9 @@ async def change_account_balance(data: dict):
         and account_available["available"] != data["total"]
     ):
         if float(account_available["available"]) < float(data["total"]):
-            emoj = '↗️'
+            emoj = "↗️"
         else:
-            emoj = '↘️'
+            emoj = "↘️"
         total = float(data["total"])
         await queue.put(f"Change account balance: {total:.2f} USDT {emoj}")
         account_available["available"] = data["total"]
@@ -214,12 +216,12 @@ async def change_candle(data: dict):
         close_price = float(data["candles"][1])
 
         if open_price > close_price:
-            result = 'buy'
+            result = "buy"
         else:
-            result = 'sell'
+            result = "sell"
 
         logger.debug(f"Change price:{result=} {open_price=} {close_price=}")
-            
+
         # await queue.put(f'{data["symbol"]} need {result}')
 
         # task = asyncio.create_task(
