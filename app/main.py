@@ -190,6 +190,8 @@ async def make_limit_order(
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
     logger.debug(data)
+    # Переписать
+    # Нужно запомнить сколько осталось доступных активов в количестве, обязательно использовать Decimal
     if (
         data["currency"] == "USDT"
         and data["relationEvent"] == "trade.other"
@@ -269,60 +271,60 @@ async def change_order(data: dict):
     # status=done
 
     if data["status"] == "done" and data["type"] == "filled":
+
         if data["side"] == "buy":
             # Поставить лимитку на продажу вверху, когда купили актив
             logger.success(f"Success buy:{data['symbol']}")
 
             # увеличить актив на 1 процент
-            plus_one_percent = Decimal(data["price"]) * Decimal("1.01")
+            # plus_one_percent = Decimal(data["price"]) * Decimal("1.01")
 
-            task = asyncio.create_task(
-                make_limit_order(
-                    side="sell",
-                    price=str(
-                        plus_one_percent.quantize(
-                            order_book[data["symbol"]]["priceIncrement"],
-                            ROUND_DOWN,
-                        )
-                    ),  # округлить цену,
-                    symbol=data["symbol"],
-                    size=data["size"],
-                )
-            )
+            # task = asyncio.create_task(
+            #     make_limit_order(
+            #         side="sell",
+            #         price=str(
+            #             plus_one_percent.quantize(
+            #                 order_book[data["symbol"]]["priceIncrement"],
+            #                 ROUND_DOWN,
+            #             )
+            #         ),  # округлить цену,
+            #         symbol=data["symbol"],
+            #         size=data["size"],
+            #     )
+            # )
 
-            background_tasks.add(task)
+            # background_tasks.add(task)
 
-            task.add_done_callback(background_tasks.discard)
+            # task.add_done_callback(background_tasks.discard)
 
         elif data["side"] == "sell":
             # Поставить лимитку на покупку внизу, когда продали актив
             logger.success(f"Success sell:{data['symbol']}")
-            return
 
             # получить количество токенов за base_stake USDT
-            tokens_count = base_stake / Decimal(
-                order_book[data["symbol"]]["open_price"]
-            )
+            # tokens_count = base_stake / Decimal(
+            #     order_book[data["symbol"]]["open_price"]
+            # )
 
-            task = asyncio.create_task(
-                make_limit_order(
-                    side="buy",
-                    price=order_book[data["symbol"]]["open_price"],
-                    symbol=data["symbol"],
-                    size=str(
-                        tokens_count.quantize(
-                            order_book[data["symbol"]]["baseIncrement"],
-                            ROUND_DOWN,
-                        )
-                    ),  # округление
-                    timeInForce="GTT",
-                    cancelAfter=86400,  # ровно сутки
-                )
-            )
+            # task = asyncio.create_task(
+            #     make_limit_order(
+            #         side="buy",
+            #         price=order_book[data["symbol"]]["open_price"],
+            #         symbol=data["symbol"],
+            #         size=str(
+            #             tokens_count.quantize(
+            #                 order_book[data["symbol"]]["baseIncrement"],
+            #                 ROUND_DOWN,
+            #             )
+            #         ),  # округление
+            #         timeInForce="GTT",
+            #         cancelAfter=86400,  # ровно сутки
+            #     )
+            # )
 
-            background_tasks.add(task)
+            # background_tasks.add(task)
 
-            task.add_done_callback(background_tasks.discard)
+            # task.add_done_callback(background_tasks.discard)
 
     match data["status"]:
         case "new":
@@ -381,12 +383,12 @@ async def main() -> None:
             }:
                 await change_order(order)
 
-    # ws_private = await KucoinWsClient.create(None, client, event, private=True)
+    ws_private = await KucoinWsClient.create(None, client, event, private=True)
     # ws_public = await KucoinWsClient.create(None, WsToken(), event, private=False)
 
     # tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
-    # await ws_private.subscribe("/account/balance")
+    await ws_private.subscribe("/account/balance")
     # await ws_public.subscribe(f"/market/candles:{tokens}")
     # await ws_private.subscribe("/spotMarket/tradeOrdersV2")
 
