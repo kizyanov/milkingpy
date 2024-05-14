@@ -83,7 +83,7 @@ for tick in order_book:
 logger.info(order_book.keys())
 
 for short_symbol in user.get_account_list(account_type='margin'):
-    symbol = f"{symbol['currency']}-USDT"
+    symbol = f"{short_symbol['currency']}-USDT"
     if symbol in order_book:
         order_book[symbol]['available'] = Decimal(short_symbol['available'])
 
