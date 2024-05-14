@@ -205,24 +205,34 @@ async def change_candle(data: dict):
         # получить количество токенов за base_stake USDT
         tokens_count = base_stake / Decimal(data["candles"][1])
 
-        task = asyncio.create_task(
-            make_limit_order(
-                side="buy",
-                price=data["candles"][1],
-                symbol=data["symbol"],
-                size=str(
-                    tokens_count.quantize(
-                        order_book[data["symbol"]]["baseIncrement"],
-                        ROUND_DOWN,
-                    )
-                ),  # округление
-                timeInForce="GTT",
-                cancelAfter=86400,  # ровно сутки
-            )
-        )
-        background_tasks.add(task)
+        open_price = float(order_book[data["symbol"]]["open_price"])
+        close_price = float(data["candles"][1])
 
-        task.add_done_callback(background_tasks.discard)
+        if open_price > close_price:
+            result = 'buy'
+        else:
+            result = 'sell'
+            
+        await queue.put(f'{data["symbol"]} need {result}')
+
+        # task = asyncio.create_task(
+        #     make_limit_order(
+        #         side="buy",
+        #         price=data["candles"][1],
+        #         symbol=data["symbol"],
+        #         size=str(
+        #             tokens_count.quantize(
+        #                 order_book[data["symbol"]]["baseIncrement"],
+        #                 ROUND_DOWN,
+        #             )
+        #         ),  # округление
+        #         timeInForce="GTT",
+        #         cancelAfter=86400,  # ровно сутки
+        #     )
+        # )
+        # background_tasks.add(task)
+
+        # task.add_done_callback(background_tasks.discard)
 
         order_book[data["symbol"]]["open_price"] = data["candles"][1]
 
@@ -368,7 +378,7 @@ async def main() -> None:
     tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
     await ws_private.subscribe("/account/balance")
-    # await ws_public.subscribe(f"/market/candles:{tokens}")
+    await ws_public.subscribe(f"/market/candles:{tokens}")
     # await ws_private.subscribe("/spotMarket/tradeOrdersV2")
 
     await send_telegram_msg()
