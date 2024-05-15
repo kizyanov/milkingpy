@@ -220,7 +220,7 @@ async def change_candle(data: dict):
         if balance != Decimal("0"):
             logger.info(balance)
             await queue.put(
-                f"Balance:{data['symbol']} {balance=:.2f} {base_keep=} need sell/buy:{base_keep-balance}"
+                f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell/buy:{base_keep-balance:.2f}"
             )
 
         # Новая свечка
