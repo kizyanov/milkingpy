@@ -211,21 +211,29 @@ async def change_account_balance(data: dict):
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
+    logger.info(data)
 
-    if order_book[data["symbol"]]["open_price"] != data["candles"][1]:
+    new_open_price = Decimal(data["candles"][1])
+
+    if order_book[data["symbol"]]["open_price"] != new_open_price:
+        logger.info(data)
+        balance = new_open_price * order_book[data["symbol"]]["available"]
+        logger.info(balance)
+        await queue.put(f"Balance:{data['symbol']} {balance}")
+
         # Новая свечка
         # получить количество токенов за base_stake USDT
-        tokens_count = base_stake / Decimal(data["candles"][1])
+        # tokens_count = base_stake / Decimal(data["candles"][1])
 
-        open_price = float(order_book[data["symbol"]]["open_price"])
-        close_price = float(data["candles"][1])
+        # open_price = float(order_book[data["symbol"]]["open_price"])
+        # close_price = float(data["candles"][1])
 
-        if open_price > close_price:
-            result = "buy"
-        else:
-            result = "sell"
+        # if open_price > close_price:
+        #     result = "buy"
+        # else:
+        #     result = "sell"
 
-        logger.debug(f"Change price:{result=} {open_price=} {close_price=}")
+        # logger.debug(f"Change price:{result=} {open_price=} {close_price=}")
 
         # await queue.put(f'{data["symbol"]} need {result}')
 
@@ -248,7 +256,7 @@ async def change_candle(data: dict):
 
         # task.add_done_callback(background_tasks.discard)
 
-        order_book[data["symbol"]]["open_price"] = data["candles"][1]
+        order_book[data["symbol"]]["open_price"] = Decimal(data["candles"][1])
 
 
 async def change_order(data: dict):
@@ -388,12 +396,12 @@ async def main() -> None:
                 await change_order(order)
 
     ws_private = await KucoinWsClient.create(None, client, event, private=True)
-    # ws_public = await KucoinWsClient.create(None, WsToken(), event, private=False)
+    ws_public = await KucoinWsClient.create(None, WsToken(), event, private=False)
 
-    # tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
+    tokens = ",".join([f"{sym}-{base_stable}_{time_shift}" for sym in currency])
 
     await ws_private.subscribe("/account/balance")
-    # await ws_public.subscribe(f"/market/candles:{tokens}")
+    await ws_public.subscribe(f"/market/candles:{tokens}")
     # await ws_private.subscribe("/spotMarket/tradeOrdersV2")
 
     await send_telegram_msg()
