@@ -87,7 +87,7 @@ for short_symbol in user.get_account_list(account_type="margin"):
         order_book[symbol]["available"] = Decimal(short_symbol["available"])
 
 for s in order_book:
-    logger.debug(order_book[s])
+    logger.debug(f"{s}:{order_book[s]}")
 
 
 async def send_telegram_msg():
@@ -199,12 +199,14 @@ async def change_account_balance(data: dict):
         and data["relationContext"]["symbol"] in order_book
     ):
         order_book[data["relationContext"]["symbol"]]["available"] = Decimal(
-            data["hold"]
+            data["total"]
         )
         await queue.put(
-            f"Change account:{data['relationContext']['symbol']} {data['hold']}"
+            f"Change account:{data['relationContext']['symbol']} {data['total']}"
         )
-        logger.info(order_book[data["relationContext"]["symbol"]])
+        logger.info(
+            f'{data["relationContext"]["symbol"]}:{order_book[data["relationContext"]["symbol"]]}'
+        )
 
 
 async def change_candle(data: dict):
@@ -278,55 +280,55 @@ async def change_order(data: dict):
         #     # Поставить лимитку на продажу вверху, когда купили актив
         #     logger.success(f"Success buy:{data['symbol']}")
 
-            # увеличить актив на 1 процент
-            # plus_one_percent = Decimal(data["price"]) * Decimal("1.01")
+        # увеличить актив на 1 процент
+        # plus_one_percent = Decimal(data["price"]) * Decimal("1.01")
 
-            # task = asyncio.create_task(
-            #     make_limit_order(
-            #         side="sell",
-            #         price=str(
-            #             plus_one_percent.quantize(
-            #                 order_book[data["symbol"]]["priceIncrement"],
-            #                 ROUND_DOWN,
-            #             )
-            #         ),  # округлить цену,
-            #         symbol=data["symbol"],
-            #         size=data["size"],
-            #     )
-            # )
+        # task = asyncio.create_task(
+        #     make_limit_order(
+        #         side="sell",
+        #         price=str(
+        #             plus_one_percent.quantize(
+        #                 order_book[data["symbol"]]["priceIncrement"],
+        #                 ROUND_DOWN,
+        #             )
+        #         ),  # округлить цену,
+        #         symbol=data["symbol"],
+        #         size=data["size"],
+        #     )
+        # )
 
-            # background_tasks.add(task)
+        # background_tasks.add(task)
 
-            # task.add_done_callback(background_tasks.discard)
+        # task.add_done_callback(background_tasks.discard)
 
         # elif data["side"] == "sell":
         #     # Поставить лимитку на покупку внизу, когда продали актив
         #     logger.success(f"Success sell:{data['symbol']}")
 
-            # получить количество токенов за base_stake USDT
-            # tokens_count = base_stake / Decimal(
-            #     order_book[data["symbol"]]["open_price"]
-            # )
+        # получить количество токенов за base_stake USDT
+        # tokens_count = base_stake / Decimal(
+        #     order_book[data["symbol"]]["open_price"]
+        # )
 
-            # task = asyncio.create_task(
-            #     make_limit_order(
-            #         side="buy",
-            #         price=order_book[data["symbol"]]["open_price"],
-            #         symbol=data["symbol"],
-            #         size=str(
-            #             tokens_count.quantize(
-            #                 order_book[data["symbol"]]["baseIncrement"],
-            #                 ROUND_DOWN,
-            #             )
-            #         ),  # округление
-            #         timeInForce="GTT",
-            #         cancelAfter=86400,  # ровно сутки
-            #     )
-            # )
+        # task = asyncio.create_task(
+        #     make_limit_order(
+        #         side="buy",
+        #         price=order_book[data["symbol"]]["open_price"],
+        #         symbol=data["symbol"],
+        #         size=str(
+        #             tokens_count.quantize(
+        #                 order_book[data["symbol"]]["baseIncrement"],
+        #                 ROUND_DOWN,
+        #             )
+        #         ),  # округление
+        #         timeInForce="GTT",
+        #         cancelAfter=86400,  # ровно сутки
+        #     )
+        # )
 
-            # background_tasks.add(task)
+        # background_tasks.add(task)
 
-            # task.add_done_callback(background_tasks.discard)
+        # task.add_done_callback(background_tasks.discard)
 
     match data["status"]:
         case "new":
@@ -392,7 +394,7 @@ async def main() -> None:
 
     await ws_private.subscribe("/account/balance")
     # await ws_public.subscribe(f"/market/candles:{tokens}")
-    await ws_private.subscribe("/spotMarket/tradeOrdersV2")
+    # await ws_private.subscribe("/spotMarket/tradeOrdersV2")
 
     await send_telegram_msg()
 
