@@ -196,7 +196,7 @@ async def change_account_balance(data: dict):
         data["relationEvent"].startswith(
             "margin."
         )  # Все действия с активом на маржинальном аккаунте
-        and data["relationContext"]["symbol"] in order_book
+        and data["currency"] + "-USDT" in order_book
     ):
         order_book[data["relationContext"]["symbol"]]["available"] = Decimal(
             data["total"]
