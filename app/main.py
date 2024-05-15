@@ -86,7 +86,8 @@ for short_symbol in user.get_account_list(account_type="margin"):
     if symbol in order_book:
         order_book[symbol]["available"] = Decimal(short_symbol["available"])
 
-logger.info(order_book)
+for s in order_book:
+    logger.debug(s)
 
 
 async def send_telegram_msg():
@@ -192,7 +193,7 @@ async def change_account_balance(data: dict):
     logger.debug(data)
 
     if (
-        data["relationEvent"].statswith(
+        data["relationEvent"].startswith(
             "margin."
         )  # Все действия с активом на маржинальном аккаунте
         and data["relationContext"]["symbol"] in order_book
