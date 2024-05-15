@@ -20,7 +20,7 @@ base_stable = config("BASE_STABLE", cast=str)
 currency = config("CURRENCY", cast=Csv(str))
 time_shift = config("TIME_SHIFT", cast=str)
 base_stake = Decimal(config("BASE_STAKE", cast=int))
-base_keep = Decimal(config("BASE_STAKE", cast=int))
+base_keep = Decimal(config("BASE_KEEP", cast=int))
 
 base_uri = "https://api.kucoin.com"
 
