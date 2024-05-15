@@ -211,7 +211,6 @@ async def change_account_balance(data: dict):
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
-    logger.info(data)
 
     new_open_price = Decimal(data["candles"][1])
 
