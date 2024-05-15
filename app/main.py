@@ -87,7 +87,7 @@ for short_symbol in user.get_account_list(account_type="margin"):
         order_book[symbol]["available"] = Decimal(short_symbol["available"])
 
 for s in order_book:
-    logger.debug(s)
+    logger.debug(order_book[s])
 
 
 async def send_telegram_msg():
@@ -272,10 +272,11 @@ async def change_order(data: dict):
     # status=done
 
     if data["status"] == "done" and data["type"] == "filled":
+        logger.info(data)
 
-        if data["side"] == "buy":
-            # Поставить лимитку на продажу вверху, когда купили актив
-            logger.success(f"Success buy:{data['symbol']}")
+        # if data["side"] == "buy":
+        #     # Поставить лимитку на продажу вверху, когда купили актив
+        #     logger.success(f"Success buy:{data['symbol']}")
 
             # увеличить актив на 1 процент
             # plus_one_percent = Decimal(data["price"]) * Decimal("1.01")
@@ -298,9 +299,9 @@ async def change_order(data: dict):
 
             # task.add_done_callback(background_tasks.discard)
 
-        elif data["side"] == "sell":
-            # Поставить лимитку на покупку внизу, когда продали актив
-            logger.success(f"Success sell:{data['symbol']}")
+        # elif data["side"] == "sell":
+        #     # Поставить лимитку на покупку внизу, когда продали актив
+        #     logger.success(f"Success sell:{data['symbol']}")
 
             # получить количество токенов за base_stake USDT
             # tokens_count = base_stake / Decimal(
@@ -391,7 +392,7 @@ async def main() -> None:
 
     await ws_private.subscribe("/account/balance")
     # await ws_public.subscribe(f"/market/candles:{tokens}")
-    # await ws_private.subscribe("/spotMarket/tradeOrdersV2")
+    await ws_private.subscribe("/spotMarket/tradeOrdersV2")
 
     await send_telegram_msg()
 
