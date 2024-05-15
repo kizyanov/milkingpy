@@ -194,9 +194,8 @@ async def change_account_balance(data: dict):
     logger.debug(data)
 
     if (
-        data["relationEvent"].startswith(
-            "margin."
-        )  # Все действия с активом на маржинальном аккаунте
+        data["relationEvent"]
+        == "margin.hold"  # Все действия с активом на маржинальном аккаунте
         and data["currency"] + "-USDT" in order_book
     ):
         order_book[data["relationContext"]["symbol"]]["available"] = Decimal(
@@ -222,7 +221,7 @@ async def change_candle(data: dict):
         if balance != Decimal("0"):
             logger.info(balance)
             await queue.put(
-                f"Balance:{data['symbol']} {balance=} {base_keep=} need sell/buy:{base_keep-balance}"
+                f"Balance:{data['symbol']} {balance=:.2f} {base_keep=} need sell/buy:{base_keep-balance}"
             )
 
         # Новая свечка
