@@ -199,10 +199,10 @@ async def change_account_balance(data: dict):
         and data["currency"] + "-USDT" in order_book
     ):
         order_book[data["relationContext"]["symbol"]]["available"] = Decimal(
-            data["total"]
+            data["available"]
         )
         await queue.put(
-            f"Change account:{data['relationContext']['symbol']} {data['total']}"
+            f"Change account:{data['relationContext']['symbol']} {data['available']}"
         )
         logger.info(
             f'{data["relationContext"]["symbol"]}:{order_book[data["relationContext"]["symbol"]]}'
