@@ -20,6 +20,7 @@ base_stable = config("BASE_STABLE", cast=str)
 currency = config("CURRENCY", cast=Csv(str))
 time_shift = config("TIME_SHIFT", cast=str)
 base_stake = Decimal(config("BASE_STAKE", cast=int))
+base_keep = Decimal(config("BASE_STAKE", cast=int))
 
 base_uri = "https://api.kucoin.com"
 
@@ -218,8 +219,11 @@ async def change_candle(data: dict):
     if order_book[data["symbol"]]["open_price"] != new_open_price:
         logger.info(data)
         balance = new_open_price * order_book[data["symbol"]]["available"]
-        logger.info(balance)
-        await queue.put(f"Balance:{data['symbol']} {balance}")
+        if balance != Decimal("0"):
+            logger.info(balance)
+            await queue.put(
+                f"Balance:{data['symbol']} {balance=} {base_keep=} need sell/buy:{base_keep-balance}"
+            )
 
         # Новая свечка
         # получить количество токенов за base_stake USDT
