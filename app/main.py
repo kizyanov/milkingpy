@@ -195,7 +195,10 @@ async def change_account_balance(data: dict):
 
     if (
         data["relationEvent"]
-        == "margin.hold"  # Все действия с активом на маржинальном аккаунте
+        in [
+            "margin.hold",
+            "margin.setted",
+        ]  # Все действия с активом на маржинальном аккаунте
         and data["currency"] + "-USDT" in order_book
     ):
         order_book[data["relationContext"]["symbol"]]["available"] = Decimal(
