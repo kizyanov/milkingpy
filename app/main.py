@@ -218,7 +218,6 @@ async def change_candle(data: dict):
     new_open_price = Decimal(data["candles"][1])
 
     if order_book[data["symbol"]]["open_price"] != new_open_price:
-        logger.info(data)
         balance = new_open_price * order_book[data["symbol"]]["available"]
         if balance != Decimal("0"):
             logger.info(balance)
