@@ -190,21 +190,11 @@ async def make_limit_order(
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
     logger.debug(data)
-    # Переписать
-    # Нужно запомнить сколько осталось доступных активов в количестве, обязательно использовать Decimal
-    if (
-        data["currency"] == "USDT"
-        and data["relationEvent"] == "trade.other"
-        and account_available["available"] != data["total"]
-    ):
-        if float(account_available["available"]) < float(data["total"]):
-            emoj = "↗️"
-        else:
-            emoj = "↘️"
-        total = float(data["total"])
-        await queue.put(f"Change account balance: {total:.2f} USDT {emoj}")
-        account_available["available"] = data["total"]
 
+    if data['relationEvent'] == 'margin.setted' and  data['relationContext']['symbol'] in order_book:
+        order_book[data['relationContext']['symbol']]['available'] = Decimal(data['available'])
+        await queue.put(f"Change account:{data['relationContext']['symbol']} {data['available']}")
+        logger.info(order_book)
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
