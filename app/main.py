@@ -191,10 +191,20 @@ async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
     logger.debug(data)
 
-    if data['relationEvent'] == 'margin.setted' and  data['relationContext']['symbol'] in order_book:
-        order_book[data['relationContext']['symbol']]['available'] = Decimal(data['available'])
-        await queue.put(f"Change account:{data['relationContext']['symbol']} {data['available']}")
+    if (
+        data["relationEvent"].statswith(
+            "margin."
+        )  # Все действия с активом на маржинальном аккаунте
+        and data["relationContext"]["symbol"] in order_book
+    ):
+        order_book[data["relationContext"]["symbol"]]["available"] = Decimal(
+            data["available"]
+        )
+        await queue.put(
+            f"Change account:{data['relationContext']['symbol']} {data['available']}"
+        )
         logger.info(order_book)
+
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
