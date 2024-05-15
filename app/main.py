@@ -198,12 +198,12 @@ async def change_account_balance(data: dict):
         and data["relationContext"]["symbol"] in order_book
     ):
         order_book[data["relationContext"]["symbol"]]["available"] = Decimal(
-            data["available"]
+            data["hold"]
         )
         await queue.put(
-            f"Change account:{data['relationContext']['symbol']} {data['available']}"
+            f"Change account:{data['relationContext']['symbol']} {data['hold']}"
         )
-        logger.info(order_book)
+        logger.info(order_book[data["relationContext"]["symbol"]])
 
 
 async def change_candle(data: dict):
