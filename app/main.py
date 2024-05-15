@@ -192,6 +192,8 @@ async def make_limit_order(
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
     logger.debug(data)
+    available = Decimal(data["available"])
+    full_currency = data["currency"] + "-USDT"
 
     if (
         data["relationEvent"]
@@ -199,13 +201,12 @@ async def change_account_balance(data: dict):
             "margin.hold",
             "margin.setted",
         ]  # Все действия с активом на маржинальном аккаунте
-        and data["currency"] + "-USDT" in order_book
+        and full_currency in order_book
+        and available != order_book[full_currency]["available"]
     ):
-        order_book[data["relationContext"]["symbol"]]["available"] = Decimal(
-            data["available"]
-        )
+        order_book[data["relationContext"]["symbol"]]["available"] = available
         await queue.put(
-            f"Change account:{data['relationContext']['symbol']} {data['available']}"
+            f"Change account:{data['relationContext']['symbol']} {available}"
         )
         logger.info(
             f'{data["relationContext"]["symbol"]}:{order_book[data["relationContext"]["symbol"]]}'
