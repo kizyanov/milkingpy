@@ -222,9 +222,17 @@ async def change_candle(data: dict):
         balance = new_open_price * order_book[data["symbol"]]["available"]
         if balance != Decimal("0"):
             logger.info(balance)
-            await queue.put(
-                f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell/buy:{base_keep-balance:.2f}"
-            )
+
+            if balance > base_keep:
+                total = balance - base_keep
+                await queue.put(
+                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell:{total:.2f}USDT or {total/new_open_price}:{data['symbol']}"
+                )
+            elif balance < base_keep:
+                total = base_keep - balance
+                await queue.put(
+                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {total/new_open_price}:{data['symbol']}"
+                )
 
         # Новая свечка
         # получить количество токенов за base_stake USDT
