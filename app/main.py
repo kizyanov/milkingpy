@@ -226,12 +226,12 @@ async def change_candle(data: dict):
             if balance > base_keep:
                 total = balance - base_keep
                 await queue.put(
-                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell:{total:.2f}USDT or {total/new_open_price}:{data['symbol']}"
+                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell:{total:.2f}USDT or {total/new_open_price:.4f}:{data['symbol']}"
                 )
             elif balance < base_keep:
                 total = base_keep - balance
                 await queue.put(
-                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {total/new_open_price}:{data['symbol']}"
+                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {total/new_open_price:.4f}:{data['symbol']}"
                 )
 
         # Новая свечка
