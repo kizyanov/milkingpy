@@ -142,6 +142,55 @@ def encrypted_msg(msg: str) -> str:
     ).decode()
 
 
+
+async def make_limit_margin_test_order(
+    side: str,
+    price: int,
+    symbol: str,
+    size: str,
+    timeInForce: str = "GTC",
+    cancelAfter: int = 0,
+    method: str = "POST",
+    method_uri: str = "/api/v1/margin/order/test",
+):
+    """Make limit margin test order by price."""
+
+    now_time = int(time.time()) * 1000
+
+    data_json = get_payload(
+        side=side,
+        symbol=symbol,
+        price=price,
+        size=size,
+        timeInForce=timeInForce,
+        cancelAfter=cancelAfter,
+    )
+
+    logger.debug(data_json)
+
+    uri_path = method_uri + data_json
+    str_to_sign = str(now_time) + method + uri_path
+
+    headers = {
+        "KC-API-SIGN": encrypted_msg(str_to_sign),
+        "KC-API-TIMESTAMP": str(now_time),
+        "KC-API-PASSPHRASE": encrypted_msg(passphrase),
+    }
+    headers.update(**headers_base)
+
+    async with (
+        aiohttp.ClientSession() as session,
+        session.post(
+            urljoin(base_uri, method_uri),
+            headers=headers,
+            data=data_json,
+        ) as response,
+    ):
+        res = await response.json()
+        logger.debug(res)
+
+
+
 async def make_limit_order(
     side: str,
     price: int,
@@ -231,7 +280,7 @@ async def change_candle(data: dict):
                 )
                 
                 task = asyncio.create_task(
-                    make_limit_order(
+                    make_limit_margin_test_order(
                         side="sell",
                         price=str(new_open_price),
                         symbol=data["symbol"],
@@ -255,7 +304,7 @@ async def change_candle(data: dict):
                     f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
                 )
                 task = asyncio.create_task(
-                    make_limit_order(
+                    make_limit_margin_test_order(
                         side="buy",
                         price=str(new_open_price),
                         symbol=data["symbol"],
