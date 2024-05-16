@@ -225,14 +225,53 @@ async def change_candle(data: dict):
 
             if balance > base_keep:
                 total = balance - base_keep
+                tokens_count = total/new_open_price
                 await queue.put(
-                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell:{total:.2f}USDT or {total/new_open_price:.4f}:{data['symbol']}"
+                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
                 )
+                
+                task = asyncio.create_task(
+                    make_limit_order(
+                        side="sell",
+                        price=str(new_open_price),
+                        symbol=data["symbol"],
+                        size=str(
+                            tokens_count.quantize(
+                                order_book[data["symbol"]]["baseIncrement"],
+                                ROUND_DOWN,
+                            )
+                        ),  # округление
+                        timeInForce="GTT",
+                        cancelAfter=86400,  # ровно сутки
+                    )
+                )
+                background_tasks.add(task)
+
+                task.add_done_callback(background_tasks.discard)
             elif balance < base_keep:
                 total = base_keep - balance
+                tokens_count = total/new_open_price
                 await queue.put(
-                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {total/new_open_price:.4f}:{data['symbol']}"
+                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
                 )
+                task = asyncio.create_task(
+                    make_limit_order(
+                        side="buy",
+                        price=str(new_open_price),
+                        symbol=data["symbol"],
+                        size=str(
+                            tokens_count.quantize(
+                                order_book[data["symbol"]]["baseIncrement"],
+                                ROUND_DOWN,
+                            )
+                        ),  # округление
+                        timeInForce="GTT",
+                        cancelAfter=86400,  # ровно сутки
+                    )
+                )
+                background_tasks.add(task)
+
+                task.add_done_callback(background_tasks.discard)
 
         # Новая свечка
         # получить количество токенов за base_stake USDT
