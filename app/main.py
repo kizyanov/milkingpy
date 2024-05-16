@@ -291,7 +291,7 @@ async def change_candle(data: dict):
                             )
                         ),  # округление
                         timeInForce="GTT",
-                        cancelAfter=86400,  # ровно сутки
+                        cancelAfter=60 * 60,  # ровно час
                         method_uri='/api/v1/margin/order'
                     )
                 )
@@ -316,7 +316,7 @@ async def change_candle(data: dict):
                             )
                         ),  # округление
                         timeInForce="GTT",
-                        cancelAfter=86400,  # ровно сутки
+                        cancelAfter=60 * 60,  # ровно час
                         method_uri='/api/v1/margin/order'
                     )
                 )
