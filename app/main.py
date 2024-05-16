@@ -280,7 +280,7 @@ async def change_candle(data: dict):
                 )
                 
                 task = asyncio.create_task(
-                    make_limit_margin_test_order(
+                    make_limit_order(
                         side="sell",
                         price=str(new_open_price),
                         symbol=data["symbol"],
@@ -292,6 +292,7 @@ async def change_candle(data: dict):
                         ),  # округление
                         timeInForce="GTT",
                         cancelAfter=86400,  # ровно сутки
+                        method_uri='/api/v1/margin/order'
                     )
                 )
                 background_tasks.add(task)
@@ -304,7 +305,7 @@ async def change_candle(data: dict):
                     f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
                 )
                 task = asyncio.create_task(
-                    make_limit_margin_test_order(
+                    make_limit_order(
                         side="buy",
                         price=str(new_open_price),
                         symbol=data["symbol"],
@@ -316,6 +317,7 @@ async def change_candle(data: dict):
                         ),  # округление
                         timeInForce="GTT",
                         cancelAfter=86400,  # ровно сутки
+                        method_uri='/api/v1/margin/order'
                     )
                 )
                 background_tasks.add(task)
