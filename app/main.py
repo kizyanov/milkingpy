@@ -84,7 +84,7 @@ for tick in order_book:
 
 for short_symbol in user.get_account_list(account_type="margin"):
     symbol = f"{short_symbol['currency']}-USDT"
-    if symbol in order_book:
+    if symbol in order_book or symbol == 'USDT-USDT':
         order_book[symbol]["available"] = Decimal(short_symbol["available"])
 
 for s in order_book:
@@ -142,7 +142,6 @@ def encrypted_msg(msg: str) -> str:
     ).decode()
 
 
-
 async def make_limit_margin_test_order(
     side: str,
     price: int,
@@ -188,7 +187,6 @@ async def make_limit_margin_test_order(
     ):
         res = await response.json()
         logger.debug(res)
-
 
 
 async def make_limit_order(
@@ -274,11 +272,11 @@ async def change_candle(data: dict):
 
             if balance > base_keep:
                 total = balance - base_keep
-                tokens_count = total/new_open_price
+                tokens_count = total / new_open_price
                 await queue.put(
                     f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
                 )
-                
+
                 task = asyncio.create_task(
                     make_limit_order(
                         side="sell",
@@ -292,7 +290,7 @@ async def change_candle(data: dict):
                         ),  # округление
                         timeInForce="GTT",
                         cancelAfter=60 * 60,  # ровно час
-                        method_uri='/api/v1/margin/order'
+                        method_uri="/api/v1/margin/order",
                     )
                 )
                 background_tasks.add(task)
@@ -300,7 +298,7 @@ async def change_candle(data: dict):
                 task.add_done_callback(background_tasks.discard)
             elif balance < base_keep:
                 total = base_keep - balance
-                tokens_count = total/new_open_price
+                tokens_count = total / new_open_price
                 await queue.put(
                     f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
                 )
@@ -317,7 +315,7 @@ async def change_candle(data: dict):
                         ),  # округление
                         timeInForce="GTT",
                         cancelAfter=60 * 60,  # ровно час
-                        method_uri='/api/v1/margin/order'
+                        method_uri="/api/v1/margin/order",
                     )
                 )
                 background_tasks.add(task)
