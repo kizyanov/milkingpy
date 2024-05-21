@@ -255,6 +255,7 @@ async def change_account_balance(data: dict):
         ]  # Все действия с активом на маржинальном аккаунте
         and full_currency in order_book
         and available != order_book[full_currency]["available"]
+        and full_currency != 'USDT-USDT'
     ):
         order_book[data["relationContext"]["symbol"]]["available"] = available
         await queue.put(
@@ -264,6 +265,23 @@ async def change_account_balance(data: dict):
             f'{data["relationContext"]["symbol"]}:{order_book[data["relationContext"]["symbol"]]}'
         )
 
+    if (
+        data["relationEvent"]
+        in [
+            "margin.hold",
+            "margin.setted",
+        ]  # Все действия с активом на маржинальном аккаунте
+        and full_currency in order_book
+        and available != order_book[full_currency]["available"]
+        and full_currency == 'USDT-USDT'
+    ):
+        order_book[full_currency]["available"] = available
+        await queue.put(
+            f"Change USDT:{data['relationContext']['symbol']} {available}"
+        )
+        logger.info(
+            f'USDT:{available}'
+        )
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
