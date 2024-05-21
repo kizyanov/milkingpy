@@ -277,7 +277,7 @@ async def change_account_balance(data: dict):
     ):
         order_book[full_currency]["available"] = available
         await queue.put(
-            f"Change USDT:{data['relationContext']['symbol']} {available}"
+            f"Change USDT:{available:.2f}"
         )
         logger.info(
             f'USDT:{available}'
