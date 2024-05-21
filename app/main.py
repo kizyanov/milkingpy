@@ -255,12 +255,12 @@ async def change_account_balance(data: dict):
         ]  # Все действия с активом на маржинальном аккаунте
         and full_currency in order_book
         and available != order_book[full_currency]["available"]
-        and full_currency != 'USDT-USDT'
+        and full_currency != "USDT-USDT"
     ):
         order_book[data["relationContext"]["symbol"]]["available"] = available
-        await queue.put(
-            f"Change account:{data['relationContext']['symbol']} {available}"
-        )
+        # await queue.put(
+        #     f"Change account:{data['relationContext']['symbol']} {available}"
+        # )
         logger.info(
             f'{data["relationContext"]["symbol"]}:{order_book[data["relationContext"]["symbol"]]}'
         )
@@ -273,15 +273,12 @@ async def change_account_balance(data: dict):
         ]  # Все действия с активом на маржинальном аккаунте
         and full_currency in order_book
         and available != order_book[full_currency]["available"]
-        and full_currency == 'USDT-USDT'
+        and full_currency == "USDT-USDT"
     ):
         order_book[full_currency]["available"] = available
-        await queue.put(
-            f"Change USDT:{available:.2f}"
-        )
-        logger.info(
-            f'USDT:{available}'
-        )
+        await queue.put(f"Change USDT:{available:.2f}")
+        logger.info(f"USDT:{available}")
+
 
 async def change_candle(data: dict):
     """Обработка изминений свечей."""
@@ -296,9 +293,9 @@ async def change_candle(data: dict):
             if balance > base_keep:
                 total = balance - base_keep
                 tokens_count = total / new_open_price
-                await queue.put(
-                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
-                )
+                # await queue.put(
+                #     f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need sell:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
+                # )
 
                 task = asyncio.create_task(
                     make_limit_order(
