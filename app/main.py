@@ -82,9 +82,14 @@ for tick in order_book:
     candle = market.get_kline(symbol=tick, kline_type=time_shift)
     order_book[tick].update({"open_price": Decimal(candle[0][1])})
 
+# Добавляем сами USDT
+order_book["USDT-USDT"] = {
+    "available": Decimal("0"),
+}
+
 for short_symbol in user.get_account_list(account_type="margin"):
     symbol = f"{short_symbol['currency']}-USDT"
-    if symbol in order_book or symbol == 'USDT-USDT':
+    if symbol in order_book:
         order_book[symbol]["available"] = Decimal(short_symbol["available"])
 
 for s in order_book:
