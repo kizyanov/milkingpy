@@ -319,9 +319,9 @@ async def change_candle(data: dict):
             elif balance < base_keep:
                 total = base_keep - balance
                 tokens_count = total / new_open_price
-                await queue.put(
-                    f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
-                )
+                # await queue.put(
+                #     f"Balance:{data['symbol']} ({balance:.2f} USDT) {base_keep} need buy:{total:.2f}USDT or {tokens_count:.4f}:{data['symbol']}"
+                # )
                 task = asyncio.create_task(
                     make_limit_order(
                         side="buy",
