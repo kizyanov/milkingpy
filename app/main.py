@@ -21,6 +21,7 @@ currency = config("CURRENCY", cast=Csv(str))
 time_shift = config("TIME_SHIFT", cast=str)
 base_stake = Decimal(config("BASE_STAKE", cast=int))
 base_keep = Decimal(config("BASE_KEEP", cast=int))
+is_tower = Decimal(config("IS_TOWER", cast=bool, default=False))
 
 base_uri = "https://api.kucoin.com"
 
@@ -98,24 +99,25 @@ for s in order_book:
 
 async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
-    while True:
-        msg = await queue.get()
-        for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
-            async with (
-                aiohttp.ClientSession() as session,
-                session.post(
-                    telegram_url,
-                    json={
-                        "chat_id": chat_id,
-                        "parse_mode": "HTML",
-                        "disable_notification": True,
-                        "text": msg,
-                    },
-                ),
-            ):
-                pass
-        await asyncio.sleep(1)
-        queue.task_done()
+    if is_tower:
+        while True:
+            msg = await queue.get()
+            for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
+                async with (
+                    aiohttp.ClientSession() as session,
+                    session.post(
+                        telegram_url,
+                        json={
+                            "chat_id": chat_id,
+                            "parse_mode": "HTML",
+                            "disable_notification": True,
+                            "text": msg,
+                        },
+                    ),
+                ):
+                    pass
+            await asyncio.sleep(1)
+            queue.task_done()
 
 
 def get_payload(
