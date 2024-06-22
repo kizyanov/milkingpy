@@ -99,25 +99,24 @@ for s in order_book:
 
 async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
-    if is_tower:
-        while True:
-            msg = await queue.get()
-            for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
-                async with (
-                    aiohttp.ClientSession() as session,
-                    session.post(
-                        telegram_url,
-                        json={
-                            "chat_id": chat_id,
-                            "parse_mode": "HTML",
-                            "disable_notification": True,
-                            "text": msg,
-                        },
-                    ),
-                ):
-                    pass
-            await asyncio.sleep(1)
-            queue.task_done()
+    while True:
+        msg = await queue.get()
+        for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
+            async with (
+                aiohttp.ClientSession() as session,
+                session.post(
+                    telegram_url,
+                    json={
+                        "chat_id": chat_id,
+                        "parse_mode": "HTML",
+                        "disable_notification": True,
+                        "text": msg,
+                    },
+                ),
+            ):
+                pass
+        await asyncio.sleep(1)
+        queue.task_done()
 
 
 def get_payload(
@@ -278,7 +277,8 @@ async def change_account_balance(data: dict):
         and full_currency == "USDT-USDT"
     ):
         order_book[full_currency]["available"] = available
-        await queue.put(f"Change USDT:{available:.2f}")
+        if is_tower:
+            await queue.put(f"Change USDT:{available:.2f}")
         logger.info(f"USDT:{available}")
 
 
