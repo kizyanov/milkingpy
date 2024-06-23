@@ -12,6 +12,7 @@ from decouple import config, Csv
 from kucoin.client import Market, Trade, User, WsToken
 from kucoin.ws_client import KucoinWsClient
 from loguru import logger
+from datetime import datetime
 
 key = config("KEY", cast=str)
 secret = config("SECRET", cast=str)
@@ -68,7 +69,6 @@ headers_base = {
 
 telegram_url = f"https://api.telegram.org/bot{config('TELEGRAM_BOT_API_KEY', cast=str)}/sendMessage"
 
-queue = asyncio.Queue()
 
 for symbol in market.get_symbol_list_v2():
     if symbol["baseCurrency"] in currency and symbol["quoteCurrency"] == base_stable:
@@ -100,23 +100,24 @@ for s in order_book:
 async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
     while True:
-        msg = await queue.get()
-        for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
-            async with (
-                aiohttp.ClientSession() as session,
-                session.post(
-                    telegram_url,
-                    json={
-                        "chat_id": chat_id,
-                        "parse_mode": "HTML",
-                        "disable_notification": True,
-                        "text": msg,
-                    },
-                ),
-            ):
-                pass
+        now = datetime.now().strftime("%M:%S")
+        if now == "30:00":
+            available = order_book["USDT-USDT"]["available"]
+            for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
+                async with (
+                    aiohttp.ClientSession() as session,
+                    session.post(
+                        telegram_url,
+                        json={
+                            "chat_id": chat_id,
+                            "parse_mode": "HTML",
+                            "disable_notification": True,
+                            "text": f"Change USDT:{available:.2f}",
+                        },
+                    ),
+                ):
+                    pass
         await asyncio.sleep(1)
-        queue.task_done()
 
 
 def get_payload(
@@ -277,8 +278,6 @@ async def change_account_balance(data: dict):
         and full_currency == "USDT-USDT"
     ):
         order_book[full_currency]["available"] = available
-        if is_tower:
-            await queue.put(f"Change USDT:{available:.2f}")
         logger.info(f"USDT:{available}")
 
 
@@ -526,6 +525,8 @@ async def main() -> None:
     await ws_private.subscribe("/account/balance")
     await ws_public.subscribe(f"/market/candles:{tokens}")
     # await ws_private.subscribe("/spotMarket/tradeOrdersV2")
+
+    logger.info(f"{tokens=}")
 
     await send_telegram_msg()
 
