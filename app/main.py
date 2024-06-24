@@ -101,7 +101,7 @@ async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
     while True:
         now = datetime.now().strftime("%M:%S")
-        if now == "30:00":
+        if now == "30:00" and is_tower:
             available = order_book["USDT-USDT"]["available"]
             for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
                 async with (
@@ -138,6 +138,8 @@ def get_payload(
             "size": size,
             "timeInForce": timeInForce,
             "cancelAfter": cancelAfter,
+            "autoBorrow":True,
+            "autoRepay":True,
         },
     )
 
