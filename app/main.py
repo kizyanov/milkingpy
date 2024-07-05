@@ -16,7 +16,6 @@ from datetime import datetime
 
 key = config("KEY", cast=str)
 secret = config("SECRET", cast=str)
-secret_encrypted = secret.encode("utf-8")
 passphrase = config("PASSPHRASE", cast=str)
 base_stable = config("BASE_STABLE", cast=str)
 currency = config("CURRENCY", cast=Csv(str))
@@ -102,7 +101,7 @@ async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
     while True:
         now = datetime.now().strftime("%M:%S")
-        if now == "30:00":
+        if now == "30:00" and is_tower:
             available = order_book["USDT-USDT"]["available"]
             for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
                 async with (
@@ -139,8 +138,8 @@ def get_payload(
             "size": size,
             "timeInForce": timeInForce,
             "cancelAfter": cancelAfter,
-            "autoBorrow": True,
-            "autoRepay": True,
+            "autoBorrow":True,
+            "autoRepay":True,
         },
     )
 
@@ -148,8 +147,55 @@ def get_payload(
 def encrypted_msg(msg: str) -> str:
     """Шифрование сообщения для биржи."""
     return base64.b64encode(
-        hmac.new(secret_encrypted, msg.encode("utf-8"), hashlib.sha256).digest(),
+        hmac.new(secret.encode("utf-8"), msg.encode("utf-8"), hashlib.sha256).digest(),
     ).decode()
+
+
+async def make_limit_margin_test_order(
+    side: str,
+    price: int,
+    symbol: str,
+    size: str,
+    timeInForce: str = "GTC",
+    cancelAfter: int = 0,
+    method: str = "POST",
+    method_uri: str = "/api/v1/margin/order/test",
+):
+    """Make limit margin test order by price."""
+
+    now_time = int(time.time()) * 1000
+
+    data_json = get_payload(
+        side=side,
+        symbol=symbol,
+        price=price,
+        size=size,
+        timeInForce=timeInForce,
+        cancelAfter=cancelAfter,
+    )
+
+    logger.debug(data_json)
+
+    uri_path = method_uri + data_json
+    str_to_sign = str(now_time) + method + uri_path
+
+    headers = {
+        "KC-API-SIGN": encrypted_msg(str_to_sign),
+        "KC-API-TIMESTAMP": str(now_time),
+        "KC-API-PASSPHRASE": encrypted_msg(passphrase),
+    }
+    headers.update(**headers_base)
+
+    async with (
+        aiohttp.ClientSession() as session,
+        session.post(
+            urljoin(base_uri, method_uri),
+            headers=headers,
+            data=data_json,
+        ) as response,
+    ):
+        res = await response.json()
+        logger.debug(res)
 
 
 async def make_limit_order(
@@ -164,7 +210,7 @@ async def make_limit_order(
 ):
     """Make limit order by price."""
 
-    now_time = str(int(time.time()) * 1000)
+    now_time = int(time.time()) * 1000
 
     data_json = get_payload(
         side=side,
@@ -175,9 +221,14 @@ async def make_limit_order(
         cancelAfter=cancelAfter,
     )
 
+    logger.debug(data_json)
+
+    uri_path = method_uri + data_json
+    str_to_sign = str(now_time) + method + uri_path
+
     headers = {
-        "KC-API-SIGN": encrypted_msg(now_time + method + method_uri + data_json),
-        "KC-API-TIMESTAMP": now_time,
+        "KC-API-SIGN": encrypted_msg(str_to_sign),
+        "KC-API-TIMESTAMP": str(now_time),
         "KC-API-PASSPHRASE": encrypted_msg(passphrase),
     }
     headers.update(**headers_base)
@@ -190,11 +241,13 @@ async def make_limit_order(
             data=data_json,
         ) as response,
     ):
-        pass
+        res = await response.json()
+        logger.debug(res)
 
 
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
+    logger.debug(data)
     available = Decimal(data["available"])
     full_currency = data["currency"] + "-USDT"
 
@@ -238,6 +291,7 @@ async def change_candle(data: dict):
     if order_book[data["symbol"]]["open_price"] != new_open_price:
         balance = new_open_price * order_book[data["symbol"]]["available"]
         if balance != Decimal("0"):
+            logger.info(balance)
 
             if balance > base_keep:
                 total = balance - base_keep
@@ -476,9 +530,7 @@ async def main() -> None:
 
     logger.info(f"{tokens=}")
 
-    if is_tower:
-        # If is tower node, run msg sender
-        await send_telegram_msg()
+    await send_telegram_msg()
 
 
 asyncio.run(main())
