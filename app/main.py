@@ -101,7 +101,7 @@ async def send_telegram_msg():
     """Отправка сообщения в телеграмм."""
     while True:
         now = datetime.now().strftime("%M:%S")
-        if now == "30:00":
+        if now == "30:00" and is_tower:
             available = order_book["USDT-USDT"]["available"]
             for chat_id in config("TELEGRAM_BOT_CHAT_ID", cast=Csv(str)):
                 async with (
@@ -247,6 +247,7 @@ async def make_limit_order(
 
 async def change_account_balance(data: dict):
     """Обработка собития изминения баланса."""
+    logger.debug(data)
     available = Decimal(data["available"])
     full_currency = data["currency"] + "-USDT"
 
@@ -529,8 +530,7 @@ async def main() -> None:
 
     logger.info(f"{tokens=}")
 
-    if is_tower:
-        await send_telegram_msg()
+    await send_telegram_msg()
 
 
 asyncio.run(main())
