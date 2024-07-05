@@ -190,7 +190,7 @@ async def make_limit_order(
             data=data_json,
         ) as response,
     ):
-        pass
+        await response.json()
 
 
 async def change_account_balance(data: dict):
