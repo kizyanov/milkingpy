@@ -5,7 +5,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=OP,KCS,WIF,IMX
+      - CURRENCY=OP,KCS,WIF,IMX,SUI,APT,ICP,BTC,APE,FRONT
       - IS_TOWER=false
     env_file:
       - .env
@@ -15,7 +15,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=SUI,APT,ICP,BTC
+      - CURRENCY=ETH,ARB,SOL,ORDI,INJ,LPT,ENS,ATOM,WOO,SUPER
       - IS_TOWER=false
     env_file:
       - .env
@@ -25,7 +25,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=ETH,ARB,SOL,ORDI
+      - CURRENCY=LINK,TON,NOT,TIA,SEI,DOT,XRP,MATIC,ZETA,XTZ
       - IS_TOWER=false
     env_file:
       - .env
@@ -35,7 +35,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=INJ,LPT,ENS,ATOM
+      - CURRENCY=TRX,BCH,AAVE,LTC,COMP,AVAX,AR,RNDR,ORN,MANTA
       - IS_TOWER=false
     env_file:
       - .env
@@ -45,7 +45,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=LINK,TON,NOT,TIA
+      - CURRENCY=NEAR,FIL,RUNE,WLD,STX,FET,JUP,DAO,GLMR,C98
       - IS_TOWER=false
     env_file:
       - .env
@@ -55,7 +55,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=SEI,DOT,XRP,MATIC
+      - CURRENCY=MKR,QNT,ILV,METIS,ZEC,MOVR,FXS,ERN,BIGTIME,YFI
       - IS_TOWER=false
     env_file:
       - .env
@@ -65,7 +65,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=TRX,BCH,AAVE,LTC
+      - CURRENCY=BNB,EGLD,UNI,THETA,LISTA,DASH,KSM,ETC,CRV,JTO
       - IS_TOWER=false
     env_file:
       - .env
@@ -75,7 +75,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=COMP,AVAX,AR,RNDR
+      - CURRENCY=ALICE,SUSHI,CELO,NEO,AXS,PYR,UMA,MASK,MANA,SAND
       - IS_TOWER=false
     env_file:
       - .env
@@ -85,7 +85,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=NEAR,FIL,RUNE,WLD
+      - CURRENCY=PEPE2,ELON,BOME,PEPE,GAL,LDO,RLC,SNX,LUNA,DYM
       - IS_TOWER=false
     env_file:
       - .env
@@ -95,157 +95,7 @@ services:
     tty: true
     restart: always
     environment:
-      - CURRENCY=STX,FET,JUP,DAO
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_11:
-    image: kizyanov/milking:latest
-    container_name: milking_11
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=BNB,EGLD,UNI,THETA
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_12:
-    image: kizyanov/milking:latest
-    container_name: milking_12
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=ALICE,SUSHI,CELO,NEO
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_13:
-    image: kizyanov/milking:latest
-    container_name: milking_13
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=AXS,PYR,UMA,MASK
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_14:
-    image: kizyanov/milking:latest
-    container_name: milking_14
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=CAKE,ADA,ONDO,FTM
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_15:
-    image: kizyanov/milking:latest
-    container_name: milking_15
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=LUNA,DYM,DYDX,KDA
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_16:
-    image: kizyanov/milking:latest
-    container_name: milking_16
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=CRV,JTO,MANA,SAND
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_17:
-    image: kizyanov/milking:latest
-    container_name: milking_17
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=GLMR,C98,BIGTIME,YFI
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_18:
-    image: kizyanov/milking:latest
-    container_name: milking_18
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=MKR,QNT,ILV,METIS
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_19:
-    image: kizyanov/milking:latest
-    container_name: milking_19
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=LISTA,DASH,KSM,ETC
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_20:
-    image: kizyanov/milking:latest
-    container_name: milking_20
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=ZEC,MOVR,FXS,ERN
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_21:
-    image: kizyanov/milking:latest
-    container_name: milking_21
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=GAL,LDO,RLC,SNX
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_22:
-    image: kizyanov/milking:latest
-    container_name: milking_22
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=ORN,MANTA,APE,FRONT
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_23:
-    image: kizyanov/milking:latest
-    container_name: milking_23
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=ZETA,XTZ,WOO,SUPER
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_24:
-    image: kizyanov/milking:latest
-    container_name: milking_24
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=FLOW,YGG,XPR,CHR
-      - IS_TOWER=false
-    env_file:
-      - .env
-  milking_25:
-    image: kizyanov/milking:latest
-    container_name: milking_25
-    tty: true
-    restart: always
-    environment:
-      - CURRENCY=PEPE2,ELON,BOME,PEPE
+      - CURRENCY=CAKE,ADA,ONDO,FTM,FLOW,YGG,XPR,CHR,DYDX,KDA
       - IS_TOWER=false
     env_file:
       - .env
