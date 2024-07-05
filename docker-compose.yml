@@ -1,105 +1,251 @@
 services:
-  milking:
-    build:
-      context: .
+  milking_1:
     image: kizyanov/milking:latest
+    container_name: milking_1
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=OP,KCS,WIF,IMX
+      - IS_TOWER=false
     env_file:
       - .env
-      # services:
-      #   milking_1:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_1
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=SUI-USDT,APT-USDT,ETH-USDT,ARB-USDT,ICP-USDT,TON-USDT,SEI-USDT,OP-USDT,IMX-USDT,CHR-USDT,COTI-USDT,AVA-USDT,MTV-USDT,KMD-USDT,RFOX-USDT,TEL-USDT,TT-USDT,AERGO-USDT,XMR-USDT,ATOM-USDT,FTM-USDT,VSYS-USDT,BNB-USDT,ALGO-USDT,XEM-USDT,XTZ-USDT,ZEC-USDT,ADA-USDT,BOLT-USDT,ARPA-USDT,CHZ-USDT,NOIA-USDT,WIN-USDT,BTT-USDT,EOSC-USDT,ONE-USDT,TOKO-USDT,LUNA-USDT,SXP-USDT,AKRO-USDT,MAP-USDT,AMPL-USDT,DAG-USDT,KPOL-USDT,ARX-USDT,NWC-USDT,BEPRO-USDT,VRA-USDT,KSM-USDT,DASH-USDT,SUTER-USDT,SENSO-USDT,XDB-USDT,SYLO-USDT,DGB-USDT,STX-USDT,COMP-USDT,CRO-USDT,KAI-USDT,WEST-USDT,WAVES-USDT,ORN-USDT,MKR-USDT,MLK-USDT,JST-USDT,SUKU-USDT,DIA-USDT,LINK-USDT,DOT-USDT,SHA-USDT,EWT-USDT
-      #   milking_2:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_2
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=EWT-USDT,USDJ-USDT,CKB-USDT,UMA-USDT,ALEPH-USDT,VELO-USDT,SUN-USDT,YFI-USDT,UNI-USDT,UOS-USDT,NIM-USDT,DEGO-USDT,FIL-USDT,REAP-USDT,AAVE-USDT,KCS-USDT,LTC-USDT,BCHSV-USDT,XLM-USDT,ETC-USDT,SNX-USDT,LYM-USDT,XRP-USDT,TRX-USDT,ONT-USDT,VET-USDT,NEO-USDT,EOS-USDT,OLT-USDT,BCH-USDT,PRE-USDT,SHR-USDT,VIDT-USDT,ROSE-USDT,CTI-USDT,PLU-USDT,GRT-USDT,CAS-USDT,REVV-USDT,1INCH-USDT,API3-USDT,UNFI-USDT,HTR-USDT,FRONT-USDT,HYDRA-USDT,DFI-USDT,CRV-USDT,SUSHI-USDT,FRM-USDT,ZEN-USDT,CUDOS-USDT,REN-USDT,LRC-USDT,KLV-USDT,THETA-USDT,QNT-USDT,BAT-USDT,DOGE-USDT,DAO-USDT,TRIAS-USDT,CAKE-USDT,ORAI-USDT,ZEE-USDT,MASK-USDT,IDEA-USDT,PHA-USDT,GAS-USDT,AVAX-USDT,KRL-USDT,POLK-USDT,ENJ-USDT
-      #   milking_3:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_3
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=ENJ-USDT,MANA-USDT,RNDR-USDT,SKEY-USDT,LAYER-USDT,TARA-USDT,IOST-USDT,DYP-USDT,XYM-USDT,ORBS-USDT,ANKR-USDT,DSLA-USDT,SAND-USDT,VAI-USDT,XCUR-USDT,FLUX-USDT,OMG-USDT,ZIL-USDT,DODO-USDT,MAN-USDT,BAX-USDT,FORTH-USDT,ACE-USDT,FLY-USDT,CWS-USDT,XDC-USDT,SHIB-USDT,POLX-USDT,KDA-USDT,STC-USDT,CELO-USDT,MATIC-USDT,ELA-USDT,CRPT-USDT,OGN-USDT,OUSD-USDT,TLOS-USDT,GLQ-USDT,MXC-USDT,HOTCROSS-USDT,HYVE-USDT,DAPPX-USDT,KONO-USDT,PRQ-USDT,MAHA-USDT,FEAR-USDT,PYR-USDT,PROM-USDT,UNO-USDT,XCAD-USDT,ELON-USDT,DIVI-USDT,POLS-USDT,LPOOL-USDT,LSS-USDT,ABBC-USDT,KOK-USDT,ZCX-USDT,NORD-USDT,GMEE-USDT,SFUND-USDT,XAVA-USDT,AI-USDT,IOI-USDT,NFT-USDT,AGIX-USDT,CQT-USDT,AIOZ-USDT,MARSH-USDT,HAPI-USDT,YFDAI-USDT
-      #   milking_4:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_4
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=YFDAI-USDT,LPT-USDT,ASD-USDT,BOND-USDT,SOUL-USDT,NEAR-USDT,DFYN-USDT,OOE-USDT,CFG-USDT,AXS-USDT,CLV-USDT,ROUTE-USDT,PMON-USDT,DPET-USDT,ERG-USDT,SOL-USDT,SLP-USDT,LITH-USDT,XCH-USDT,HAKA-USDT,MTL-USDT,IOTX-USDT,GALAX-USDT,REQ-USDT,TXA-USDT,CIRUS-USDT,QI-USDT,ODDZ-USDT,XPR-USDT,MOVR-USDT,WOO-USDT,XPRT-USDT,EGLD-USDT,HBAR-USDT,FLOW-USDT,NKN-USDT,PBX-USDT,XNL-USDT,SOLVE-USDT,DMTR-USDT,CTSI-USDT,ALICE-USDT,OPUL-USDT,ILV-USDT,BAND-USDT,FTT-USDT,DVPN-USDT,SLIM-USDT,TLM-USDT,DEXE-USDT,RUNE-USDT,RMRK-USDT,C98-USDT,BLOK-USDT,SOLR-USDT,PUSH-USDT,FLAME-USDT,AGLD-USDT,NAKA-USDT,YLD-USDT,REEF-USDT,TIDAL-USDT,INJ-USDT,VEGA-USDT,ALPHA-USDT,AR-USDT,JASMY-USDT,PERP-USDT,SCLP-USDT,SUPER-USDT,CPOOL-USDT
-      #   milking_5:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_5
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=CPOOL-USDT,HERO-USDT,AURY-USDT,SWASH-USDT,LTO-USDT,MTRG-USDT,DREAMS-USDT,QUICK-USDT,TRU-USDT,WRX-USDT,DATA-USDT,ISP-USDT,CERE-USDT,SHILL-USDT,ERN-USDT,FTG-USDT,PAXG-USDT,AUDIO-USDT,ENS-USDT,XTM-USDT,MNW-USDT,FXS-USDT,ATA-USDT,VXV-USDT,DPR-USDT,CWAR-USDT,PBR-USDT,TWT-USDT,OM-USDT,ADX-USDT,GLM-USDT,NUM-USDT,VLX-USDT,TRADE-USDT,1EARTH-USDT,MONI-USDT,LIKE-USDT,LIT-USDT,KAVA-USDT,SFP-USDT,BURGER-USDT,CREAM-USDT,RSR-USDT,GODS-USDT,KMA-USDT,WLD-USDT,BOSON-USDT,POLC-USDT,XTAG-USDT,NGC-USDT,HARD-USDT,POND-USDT,VR-USDT,EPIK-USDT,NGL-USDT,PEL-USDT,LINA-USDT,KLAY-USDT,CREDI-USDT,TRVL-USDT,ARKER-USDT,BONDLY-USDT,XEC-USDT,HEART-USDT,UNB-USDT,GAFI-USDT,UFO-USDT,CHMB-USDT,GEEQ-USDT,ORC-USDT,PEOPLE-USDT
-      #   milking_6:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_6
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=PEOPLE-USDT,ADS-USDT,OCEAN-USDT,WHALE-USDT,TIME-USDT,CWEB-USDT,IOTA-USDT,HNT-USDT,GGG-USDT,REVU-USDT,CLH-USDT,GLMR-USDT,CTC-USDT,GARI-USDT,FRR-USDT,ASTR-USDT,ERTHA-USDT,FCON-USDT,MTS-USDT,HBB-USDT,CVX-USDT,AMP-USDT,ACT-USDT,MJT-USDT,STARLY-USDT,RANKER-USDT,WMT-USDT,XNO-USDT,MARS4-USDT,TFUEL-USDT,METIS-USDT,BULL-USDT,SON-USDT,MELOS-USDT,APE-USDT,GMT-USDT,BICO-USDT,STG-USDT,LMR-USDT,LOKA-USDT,JAM-USDT,BNC-USDT,LBP-USDT,CFX-USDT,LOOKS-USDT,XCN-USDT,UPO-USDT,CEEK-USDT,NHCT-USDT,FRA-USDT,VISION-USDT,ALPINE-USDT,OVR-USDT,AKT-USDT,SIN-USDT,AUSD-USDT,BOBA-USDT,BFC-USDT,BIFI-USDT,MBL-USDT,DUSK-USDT,USDD-USDT,MLS-USDT,ACH-USDT,SCRT-USDT,STORE-USDT,CCD-USDT,LUNC-USDT,USTC-USDT,EVER-USDT,ICX-USDT
-      #   milking_7:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_7
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=ICX-USDT,WELL-USDT,FORT-USDT,USDP-USDT,CSPR-USDT,WEMIX-USDT,OLE-USDT,LDO-USDT,CULT-USDT,FIDA-USDT,RBP-USDT,SRBP-USDT,HIBAYC-USDT,OGV-USDT,WOMBAT-USDT,HIPUNKS-USDT,FT-USDT,HIENS4-USDT,EGAME-USDT,HISAND33-USDT,DC-USDT,NEER-USDT,RVN-USDT,HIENS3-USDT,MC-USDT,SWEAT-USDT,HIODBS-USDT,CMP-USDT,PIX-USDT,MPLX-USDT,HIDOODLES-USDT,ETHW-USDT,ACQ-USDT,AOG-USDT,HIMAYC-USDT,PUMLX-USDT,XETA-USDT,GEM-USDT,DERC-USDT,KICKS-USDT,TRIBL-USDT,GMX-USDT,HIOD-USDT,POKT-USDT,EUL-USDT,HIMEEBITS-USDT,HISQUIGGLE-USDT,XCV-USDT,HFT-USDT,ECOX-USDT,AMB-USDT,AZERO-USDT,HIFIDENZA-USDT,BEAT-USDT,HIGAZERS-USDT,NAVI-USDT,HIPENGUINS-USDT,ALT-USDT,HICLONEX-USDT,OAS-USDT,HICOOLCATS-USDT,HIAZUKI-USDT,TRAC-USDT,GFT-USDT,BLUR-USDT,HIFRIENDS-USDT,WAXL-USDT,FLOKI-USDT,SSV-USDT,ACS-USDT,IGU-USDT
-      #   milking_8:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_8
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=IGU-USDT,CSIX-USDT,FET-USDT,CFX2S-USDT,HISEALS-USDT,SIDUS-USDT,GOAL-USDT,AIPAD-USDT,RDNT-USDT,SYN-USDT,GNS-USDT,GRAIL-USDT,BLZ-USDT,HIBEANZ-USDT,HALO-USDT,NXRA-USDT,MINA-USDT,XRD-USDT,NOM-USDT,LQTY-USDT,ID-USDT,HMND-USDT,HIFI-USDT,MYRIA-USDT,SD-USDT,CGPT-USDT,KAGI-USDT,OTK-USDT,BABYDOGE-USDT,PZP-USDT,LOCUS-USDT,IRON-USDT,ZPAY-USDT,IZI-USDT,KAS-USDT,PEPE-USDT,CETUS-USDT,SUIP-USDT,KARATE-USDT,WLKN-USDT,TURBOS-USDT,SUIA-USDT,LMWR-USDT,BOB-USDT,LADYS-USDT,RFD-USDT,TENET-USDT,HIBAKC-USDT,VERSE-USDT,OBI-USDT,INFRA-USDT,TSUGT-USDT,EDU-USDT,ORDI-USDT,LAI-USDT,VOLT-USDT,TOMI-USDT,COMBO-USDT,XPLL-USDT,CANDY-USDT,PIP-USDT,VCORE-USDT,MMM-USDT,MAV-USDT,XEN-USDT,LBR-USDT,PENDLE-USDT,EGO-USDT,PEPE2-USDT,MM-USDT,DCK-USDT
-      #   milking_9:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_9
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=DCK-USDT,LYX-USDT,ZBC-USDT,GHX-USDT,STND-USDT,TOWER-USDT,WOOP-USDT,T-USDT,NYM-USDT,SYS-USDT,BRISE-USDT,EPX-USDT,GST-USDT,GAL-USDT,BSW-USDT,FITFI-USDT,FSN-USDT,H2O-USDT,GMM-USDT,HIFLUF-USDT,HIBIRDS-USDT,BDX-USDT,FLR-USDT,HIMFERS-USDT,OSMO-USDT,ASTRA-USDT,MAGIC-USDT,SQUAD-USDT,SIMP-USDT,HIVALHALLA-USDT,RPL-USDT,HIRENGA-USDT,KING-USDT,SHIB2S-USDT,HIGH-USDT,HIUNDEAD-USDT,VOXEL-USDT,PSTAKE-USDT,SPA-USDT,DAR-USDT,MV-USDT,XDEFI-USDT,RACA-USDT,XWG-USDT,SWFTC-USDT,BRWL-USDT,CELR-USDT,AURORA-USDT,KNC-USDT,PSL-USDT,PUNDIX-USDT,WAX-USDT,PDEX-USDT,WILD-USDT,QRDO-USDT,OXT-USDT,BAL-USDT,STORJ-USDT,YGG-USDT,SDAO-USDT,SKL-USDT,NMR-USDT,TRB-USDT,DYDX-USDT,XYO-USDT,GTC-USDT,EQX-USDT,RLC-USDT,ISLM-USDT,BIGTIME-USDT,NTRN-USDT
-      #   milking_10:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_10
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=NTRN-USDT,ARKM-USDT,OFN-USDT,ZELIX-USDT,TIA-USDT,KLUB-USDT,CYBER-USDT,MEME-USDT,LABS-USDT,HAI-USDT,AIEPK-USDT,PYUSD-USDT,TOKEN-USDT,SHRAP-USDT,POL-USDT,SATS-USDT,RPK-USDT,ATEM-USDT,ATOR-USDT,PYTH-USDT,RATS-USDT,VRTX-USDT,ROOT-USDT,WBTC-USDT,LOOM-USDT,ELF-USDT,DCR-USDT,ZRX-USDT,FLIP-USDT,UQC-USDT,LSK-USDT,DENT-USDT,QKC-USDT,BONK-USDT,MIND-USDT,MNT-USDT,WORK-USDT,INSP-USDT,AUCTION-USDT,JTO-USDT,UTK-USDT,SNS-USDT,DOVI-USDT,SEAM-USDT,FINC-USDT,VANRY-USDT,GTT-USDT,MNDE-USDT,COQ-USDT,IRL-USDT,SOLS-USDT,POLYX-USDT,SCPT-USDT,TAO-USDT,TURT-USDT,BIIS-USDT,ARTY-USDT,GRAPE-USDT,MUBI-USDT,AA-USDT,ZOOA-USDT,ANALOS-USDT,MYRO-USDT,SILLY-USDT,MOBILE-USDT,ROUP-USDT,OOFP-USDT,1CAT-USDT,RAY-USDT,ALEX-USDT,ZKF-USDT
-      #   milking_11:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_11
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=ZKF-USDT,PORT3-USDT,XAI-USDT,NFP-USDT,ORCA-USDT,KACE-USDT,APP-USDT,NEON-USDT,ISSP-USDT,BIDP-USDT,HON-USDT,TUNE-USDT,ETGM-USDT,MANTA-USDT,ONDO-USDT,STRK-USDT,BCUT-USDT,TADA-USDT,DYM-USDT,NETVR-USDT,NAVX-USDT,LENDS-USDT,PIXEL-USDT,SLN-USDT,WIF-USDT,SAROS-USDT,AMU-USDT,GTAI-USDT,KALT-USDT,DMAIL-USDT,AFG-USDT,WEN-USDT,ZETA-USDT,DEFI-USDT,PMG-USDT,JUP-USDT,FIRE-USDT,STRIKE-USDT,MXM-USDT,BMX-USDT,MAVIA-USDT,FORWARD-USDT,PANDORA-USDT,DECHAT-USDT,SAVM-USDT,BBL-USDT,ICE-USDT,PORTAL-USDT,QORPO-USDT,HGP-USDT,STAMP-USDT,VOYA-USDT,AEG-USDT,TUSD-USDT,SCA-USDT,PATEX-USDT,NIBI-USDT,ISME-USDT,KNGL-USDT,AEVO-USDT,ZEND-USDT,HTX-USDT,UTXO-USDT,AITECH-USDT,BOME-USDT,ETHFI-USDT,MPC-USDT,ZK-USDT
-
-      #   milking_1:
-      #     image: kizyanov/milking:latest
-      #     container_name: milking_1
-      #     restart: always
-      #     env_file:
-      #       - .env
-      #     environment:
-      #       - TICKETS=
+  milking_2:
+    image: kizyanov/milking:latest
+    container_name: milking_2
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=SUI,APT,ICP,BTC
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_3:
+    image: kizyanov/milking:latest
+    container_name: milking_3
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=ETH,ARB,SOL,ORDI
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_4:
+    image: kizyanov/milking:latest
+    container_name: milking_4
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=INJ,LPT,ENS,ATOM
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_5:
+    image: kizyanov/milking:latest
+    container_name: milking_5
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=LINK,TON,NOT,TIA
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_6:
+    image: kizyanov/milking:latest
+    container_name: milking_6
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=SEI,DOT,XRP,MATIC
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_7:
+    image: kizyanov/milking:latest
+    container_name: milking_7
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=TRX,BCH,AAVE,LTC
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_8:
+    image: kizyanov/milking:latest
+    container_name: milking_8
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=COMP,AVAX,AR,RNDR
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_9:
+    image: kizyanov/milking:latest
+    container_name: milking_9
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=NEAR,FIL,RUNE,WLD
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_10:
+    image: kizyanov/milking:latest
+    container_name: milking_10
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=STX,FET,JUP,DAO
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_11:
+    image: kizyanov/milking:latest
+    container_name: milking_11
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=BNB,EGLD,UNI,THETA
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_12:
+    image: kizyanov/milking:latest
+    container_name: milking_12
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=ALICE,SUSHI,CELO,NEO
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_13:
+    image: kizyanov/milking:latest
+    container_name: milking_13
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=AXS,PYR,UMA,MASK
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_14:
+    image: kizyanov/milking:latest
+    container_name: milking_14
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=CAKE,ADA,ONDO,FTM
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_15:
+    image: kizyanov/milking:latest
+    container_name: milking_15
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=LUNA,DYM,DYDX,KDA
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_16:
+    image: kizyanov/milking:latest
+    container_name: milking_16
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=CRV,JTO,MANA,SAND
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_17:
+    image: kizyanov/milking:latest
+    container_name: milking_17
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=GLMR,C98,BIGTIME,YFI
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_18:
+    image: kizyanov/milking:latest
+    container_name: milking_18
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=MKR,QNT,ILV,METIS
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_19:
+    image: kizyanov/milking:latest
+    container_name: milking_19
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=LISTA,DASH,KSM,ETC
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_20:
+    image: kizyanov/milking:latest
+    container_name: milking_20
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=ZEC,MOVR,FXS,ERN
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_21:
+    image: kizyanov/milking:latest
+    container_name: milking_21
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=GAL,LDO,RLC,SNX
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_22:
+    image: kizyanov/milking:latest
+    container_name: milking_22
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=ORN,MANTA,APE,FRONT
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_23:
+    image: kizyanov/milking:latest
+    container_name: milking_23
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=ZETA,XTZ,WOO,SUPER
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_24:
+    image: kizyanov/milking:latest
+    container_name: milking_24
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=FLOW,YGG,XPR,CHR
+      - IS_TOWER=false
+    env_file:
+      - .env
+  milking_25:
+    image: kizyanov/milking:latest
+    container_name: milking_25
+    tty: true
+    restart: always
+    environment:
+      - CURRENCY=PEPE2,ELON,BOME,PEPE
+      - IS_TOWER=false
+    env_file:
+      - .env
