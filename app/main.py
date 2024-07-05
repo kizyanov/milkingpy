@@ -163,7 +163,7 @@ async def make_limit_margin_test_order(
 ):
     """Make limit margin test order by price."""
 
-    now_time = int(time.time()) * 1000
+    now_time = str(int(time.time()) * 1000)
 
     data_json = get_payload(
         side=side,
@@ -174,14 +174,9 @@ async def make_limit_margin_test_order(
         cancelAfter=cancelAfter,
     )
 
-    logger.debug(data_json)
-
-    uri_path = method_uri + data_json
-    str_to_sign = str(now_time) + method + uri_path
-
     headers = {
-        "KC-API-SIGN": encrypted_msg(str_to_sign),
-        "KC-API-TIMESTAMP": str(now_time),
+        "KC-API-SIGN": encrypted_msg(now_time + method + method_uri + data_json),
+        "KC-API-TIMESTAMP": now_time,
         "KC-API-PASSPHRASE": encrypted_msg(passphrase),
     }
     headers.update(**headers_base)
@@ -195,7 +190,6 @@ async def make_limit_margin_test_order(
         ) as response,
     ):
         res = await response.json()
-        logger.debug(res)
 
 
 async def make_limit_order(
